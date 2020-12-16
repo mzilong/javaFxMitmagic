@@ -1,0 +1,6 @@
+2020-12-16 14:37:57  [ JavaFX Application Thread:0 ] - [ INFO ]  打开[WelcomeController]
+2020-12-16 14:37:59  [ JavaFX Application Thread:1278 ] - [ INFO ]  关闭[WelcomeController]
+2020-12-16 14:38:01  [ JavaFX Application Thread:4033 ] - [ INFO ]  打开[MainController]
+2020-12-16 14:38:39  [ JavaFX Application Thread:41230 ] - [ INFO ]  我是传过来的数据
+2020-12-16 14:38:39  [ JavaFX Application Thread:41427 ] - [ INFO ]  打开[SerialPortController]
+2020-12-16 14:38:54  [ JavaFX Application Thread:56435 ] - [ INFO ]  关闭[MainController]

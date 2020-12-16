@@ -1,0 +1,125 @@
+.root {
+    -fx-font-family: "Roboto";
+    -fx-font-smoothing-type: gray;
+
+    /*基础颜色*/
+    -fx-base:#0091ea;
+    -fx-base--2_1:derive(-fx-base,-2.1%);
+    -fx-base--6:derive(-fx-base,-6%);
+    -fx-base--8:derive(-fx-base,-8%);
+    -fx-base--20:derive(-fx-base,-20%);
+    -fx-base-8:derive(-fx-base,8%);
+    -fx-base-10:derive(-fx-base,10%);
+    -fx-base-20:derive(-fx-base,20%);
+    -fx-base-26_4:derive(-fx-base,26.4%);;
+    -fx-base-35:derive(-fx-base,35%);
+    -fx-base-40:derive(-fx-base,40%);
+    -fx-base-47_9:derive(-fx-base,47.9%);
+    -fx-base-70:derive(-fx-base,70%);
+    -fx-base-75:derive(-fx-base,75%);
+    /*背景颜色*/
+    -fx-background: -fx-base-26_4;
+    /*控件颜色*/
+    -fx-color: -fx-base;
+    -fx-color--6:derive(-fx-color,-6%);
+    -fx-color--8:derive(-fx-color,-8%);
+    -fx-color--9:derive(-fx-color,-9%);
+    -fx-color--23:derive(-fx-color,-23%);
+    -fx-color--33:derive(-fx-color,-33%);
+    -fx-color-8:derive(-fx-color,8%);
+    -fx-color-10:derive(-fx-color,10%);
+    -fx-color-8-10:ladder(-fx-color, -fx-color-8 75%, -fx-color-10 80%);
+
+    /*用于突出显示/突出显示对象颜色。例如：selected *文本；菜单，列表，树和表中的选定项目；进度条*/
+    -fx-accent: -fx-base--20;
+
+    /*获取焦点颜色，以提供发光效果*/
+    -fx-focus-color: #ffffff;
+    -fx-faint-focus-color: #ffffff22;
+
+    /*鼠标移动上去悬浮颜色*/
+    -fx-hover-base: ladder(-fx-base,-fx-base-20 20%,-fx-base-35 35%,-fx-base-40 50%);
+    /*按压颜色*/
+    -fx-pressed-base: -fx-base--6;
+
+    /* 列表中项目的背景，例如菜单，列表，树和表格之类的东西*/
+    -fx-selection-bar: -fx-accent;
+
+    -fx-body-color: linear-gradient(to bottom,-fx-color-8-10,-fx-color--8);
+    -fx-body-color-bottomup: linear-gradient(to top, -fx-color-10 ,-fx-color--6);
+    -fx-body-color-to-right: linear-gradient(to right, -fx-color-10 ,-fx-color--6);
+    /*-fx-outer-border: linear-gradient(to bottom,-fx-color--9 0%,-fx-color--33 100%);*/
+}
+
+/*
+ *	Apply google Roboto font to all UI components
+ */
+
+
+/*******************************************************************************
+*                                                                              *
+* JFX Decorator                                                                *
+*                                                                              *
+*******************************************************************************/
+
+.jfx-decorator {
+    -fx-decorator-color: -fx-base;
+}
+
+.jfx-decorator .jfx-decorator-buttons-container {
+    -fx-background-color: -fx-decorator-color;
+}
+
+.resize-border {
+    -fx-border-color: -fx-decorator-color;
+    -fx-border-width: 4 4 4 4;
+}
+
+.jfx-decorator .jfx-decorator-title-container .jfx-decorator-text{
+    -fx-fill: -fx-text-base-color;
+}
+
+.jfx-decorator-menu .jfx-decorator-menuitem .jfx-svg-glyph{
+    -fx-background-color: -fx-text-base-color;
+}
+
+.jfx-decorator-menu {
+    -fx-fill: -fx-text-base-color;
+    -fx-font-size: 12;
+    -fx-padding: 0.833333em 0em 0.833333em 0em;
+}
+.jfx-decorator-menu .jfx-decorator-menuitem{
+    -fx-background-color: -fx-decorator-color;
+    -fx-font-size: 12;
+}
+
+.jfx-decorator-menu .jfx-decorator-menuitem:focused{
+    -fx-background-color: -fx-background;
+}
+
+.jfx-decorator-menu .jfx-decorator-menuitem .label{
+    -fx-text-fill: -fx-text-base-color;
+}
+.jfx-decorator-buttons-container  .jfx-svg-glyph{
+    -fx-background-color: -fx-text-base-color;
+}
+
+
+/*******************************************************************************
+ *                                                                             *
+ * JFX Dialog Layout                                                           *
+ *                                                                             *
+ ******************************************************************************/
+
+.jfx-alert-overlay > .depth-container > .jfx-alert-content-container,
+.jfx-alert-overlay > .jfx-alert-content-container{
+    -fx-background-color: -fx-background;
+}
+
+.jfx-alert-overlay .jfx-rippler {
+    -jfx-rippler-fill: -fx-text-background-color;
+}
+
+.label {
+    -fx-text-fill: -fx-text-background-color;
+}

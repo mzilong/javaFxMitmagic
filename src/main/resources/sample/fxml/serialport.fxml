@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<AnchorPane xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.controller.SerialPortController">
+    <children>
+        <GridPane id="mainPane" alignment="center" minWidth="-Infinity" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
+            <children>
+                <HBox alignment="CENTER_LEFT" GridPane.columnIndex="1" GridPane.columnSpan="1" GridPane.rowIndex="1">
+                    <children>
+                        <Label text="串口号：" textFill="WHITE" />
+                        <ComboBox fx:id="cbPortName" onAction="#onChange" prefWidth="150.0" promptText="请选择串口号">
+                            <HBox.margin>
+                                <Insets right="10.0" />
+                            </HBox.margin>
+                        </ComboBox>
+                        <Label text="停止位：" textFill="WHITE" />
+                        <ComboBox fx:id="cbStopBits" onAction="#onChange" prefWidth="150.0" promptText="请选择停止位">
+                            <HBox.margin>
+                                <Insets right="10.0" />
+                            </HBox.margin>
+                        </ComboBox>
+                        <Label text="波特率：" textFill="WHITE" />
+                        <ComboBox fx:id="cbBaudRate" onAction="#onChange" prefWidth="150.0" promptText="请选择波特率">
+                            <HBox.margin>
+                                <Insets right="10.0" />
+                            </HBox.margin>
+                        </ComboBox>
+                    </children>
+                </HBox>
+                <HBox alignment="CENTER_LEFT" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                    <children>
+                        <Label text="校验位：" textFill="WHITE" />
+                        <ComboBox fx:id="cbParity" onAction="#onChange" prefWidth="150.0" promptText="请选择校验位">
+                            <HBox.margin>
+                                <Insets right="10.0" />
+                            </HBox.margin>
+                        </ComboBox>
+                        <Label text="数据位：" textFill="WHITE" />
+                        <ComboBox fx:id="cbDataBits" onAction="#onChange" prefWidth="150.0" promptText="请选择数据位">
+                            <HBox.margin>
+                                <Insets right="10.0" />
+                            </HBox.margin>
+                        </ComboBox>
+                        <Label text="流控制：" textFill="WHITE" />
+                        <ComboBox fx:id="cbFlowcontrol" onAction="#onChange" prefWidth="150.0" promptText="请选择流控制">
+                            <HBox.margin>
+                                <Insets right="10.0" />
+                            </HBox.margin>
+                        </ComboBox>
+                    </children>
+                </HBox>
+                <Button fx:id="btnConfigurePort" mnemonicParsing="false" onAction="#onButtonClick" prefHeight="65.0" prefWidth="250" text="配置端口(ctrl+p)" GridPane.columnIndex="2" GridPane.rowIndex="1" GridPane.rowSpan="2">
+                    <font>
+                        <Font size="24.0" />
+                    </font>
+                    <GridPane.margin>
+                        <Insets />
+                    </GridPane.margin>
+                </Button>
+                <TextArea fx:id="textArea" prefHeight="200.0" text="68 AA AA AA AA AA AA 68 13 00 DF 16" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="3">
+                    <GridPane.margin>
+                        <Insets />
+                    </GridPane.margin>
+                </TextArea>
+                <HBox alignment="BOTTOM_LEFT" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="4">
+                    <children>
+                        <Button fx:id="btnCopy" mnemonicParsing="false" onAction="#onButtonClick" prefHeight="50.0" prefWidth="150" text="复制" />
+                        <Button fx:id="btnPaste" mnemonicParsing="false" onAction="#onButtonClick" prefHeight="50.0" prefWidth="150" text="粘贴">
+                            <HBox.margin>
+                                <Insets />
+                            </HBox.margin>
+                        </Button>
+                        <Button fx:id="btnSelectAll" mnemonicParsing="false" onAction="#onButtonClick" prefHeight="50.0" prefWidth="150" text="全选">
+                            <HBox.margin>
+                                <Insets />
+                            </HBox.margin>
+                        </Button>
+                        <Button fx:id="btnClear" mnemonicParsing="false" onAction="#onButtonClick" prefHeight="50.0" prefWidth="150" text="清空">
+                            <HBox.margin>
+                                <Insets />
+                            </HBox.margin>
+                        </Button>
+                    </children>
+                </HBox>
+                <Button fx:id="btnSend" onAction="#onButtonClick" prefHeight="65.0" prefWidth="250" text="发送(Enter)" GridPane.columnIndex="2" GridPane.rowIndex="4">
+                    <font>
+                        <Font size="24.0" />
+                    </font>
+                    <GridPane.margin>
+                        <Insets />
+                    </GridPane.margin>
+                </Button>
+                <TextArea fx:id="textAreaShow" prefHeight="200.0" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="5" />
+            </children>
+            <columnConstraints>
+                <ColumnConstraints />
+                <ColumnConstraints />
+                <ColumnConstraints />
+            </columnConstraints>
+            <rowConstraints>
+                <RowConstraints />
+                <RowConstraints />
+                <RowConstraints />
+                <RowConstraints />
+                <RowConstraints />
+                <RowConstraints />
+            </rowConstraints>
+            <padding>
+                <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+            </padding>
+        </GridPane>
+    </children>
+</AnchorPane>

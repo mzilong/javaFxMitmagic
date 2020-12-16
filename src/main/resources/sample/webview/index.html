@@ -1,0 +1,418 @@
+<!DOCTYPE HTML >
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="拓扑图">
+    <title>拓扑图</title>
+
+    <!-- 导入script -->
+    <script  src="js/browser.min.js"></script>
+    <script  src="js/polyfill.min.js"></script>
+    <script  src="js/g6.min.js"></script>
+    <!--type="text/babel"兼容ES6语法，使用前必须引入browser.min.js-->
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+    </style>
+</head>
+
+<body>
+<p> <input id="address" name="address" > <input value="搜索" type="button" onclick="addActionHandler(address.value)"/></p>
+<div id="container"></div>
+<p> <a href="about:blank" onclick="app.exit()">退出应用程序</a> </p>
+<p> <input value="加载数据" type="button" onclick="loadData()"> </p>
+</body>
+<script type="text/javascript">
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    const descriptionDiv = document.createElement("div");
+    descriptionDiv.id = "discription";
+    document.getElementById("container").appendChild(descriptionDiv);
+
+    /**
+     * 数据
+     */
+    var data = {
+        id: "g0",
+        label: "台区路由终端",
+        img: "icon/ic_terminal.png",
+        children: [
+            {
+                id: "g1",
+                label: "分支1",
+                img: "icon/ic_branch.png",
+                children: [
+                    {
+                        id: "g1-1",
+                        label: "A相(0)",
+                        collapsed: true,
+                        img: "icon/ic_list.png"
+                    },
+                    {
+                        id: "g1-2",
+                        label: "B相(0)",
+                        collapsed: true,
+                        img: "icon/ic_list.png"
+                    },
+                    {
+                        id: "g1-3",
+                        label: "C相(0)",
+                        collapsed: true,
+                        img: "icon/ic_list.png",
+                    }
+                ]
+            },
+            {
+                id: "g2",
+                label: "分支2",
+                img: "icon/ic_branch.png",
+                children: [
+                    {
+                        id: "g2-1",
+                        label: "A相(10)",
+                        collapsed: true,
+                        img: "icon/ic_list.png",
+                        children: [
+                            { id: "g2-1-1",label: "000000000001",img: "icon/ic_meter.png" },
+                            { id: "g2-1-2",label: "000000000002",img: "icon/ic_meter.png" },
+                            { id: "g2-1-3",label: "000000000003",img: "icon/ic_meter.png" },
+                            { id: "g2-1-4",label: "000000000004",img: "icon/ic_meter.png" },
+                            { id: "g2-1-5",label: "000000000005",img: "icon/ic_meter.png" },
+                            { id: "g2-1-6",label: "000000000006",img: "icon/ic_meter.png" },
+                            { id: "g2-1-7",label: "000000000007",img: "icon/ic_meter.png" },
+                            { id: "g2-1-8",label: "000000000008",img: "icon/ic_meter.png" },
+                            { id: "g2-1-9",label: "000000000009",img: "icon/ic_meter.png"},
+                            { id: "g2-1-10",label: "000000000010",img: "icon/ic_meter.png" }
+                        ]
+                    },
+                    {
+                        id: "g2-2",
+                        label: "B相(5)",
+                        collapsed: true,
+                        img: "icon/ic_list.png",
+                        children: [
+                            { id: "g2-2-1",label: "000000000011",img: "icon/ic_meter.png" },
+                            { id: "g2-2-2",label: "000000000012",img: "icon/ic_meter.png" },
+                            { id: "g2-2-3",label: "000000000013",img: "icon/ic_meter.png" },
+                            { id: "g2-2-4",label: "000000000014",img: "icon/ic_meter.png"},
+                            { id: "g2-2-5",label: "000000000015",img: "icon/ic_meter.png" }
+                        ]
+                    },
+                    {
+                        id: "g2-3",
+                        label: "C相(3)",
+                        collapsed: true,
+                        img: "icon/ic_list.png",
+                        children: [
+                            { id: "g2-3-1",label: "000000000016",img: "icon/ic_meter.png" },
+                            { id: "g2-3-2",label: "000000000017",img: "icon/ic_meter.png" },
+                            { id: "g2-3-3",label: "000000000018",img: "icon/ic_meter.png" }
+                        ]
+                    }
+                ]
+            },
+            {
+                id: "g3",
+                label: "分支3",
+                img: "icon/ic_branch.png",
+                children: [
+                    {
+                        id: "g3-1",
+                        label: "A相(5)",
+                        collapsed: true,
+                        img: "icon/ic_list.png",
+                        children: [
+                            { id: "g3-1-1",label: "000000000019",img: "icon/ic_meter.png" },
+                            { id: "g3-1-2",label: "000000000020",img: "icon/ic_meter.png" },
+                            { id: "g3-1-3",label: "000000000021",img: "icon/ic_meter.png" },
+                            { id: "g3-1-4",label: "000000000022",img: "icon/ic_meter.png" },
+                            { id: "g3-1-5",label: "000000000023",img: "icon/ic_meter.png" }
+                        ]
+                    },
+                    {
+                        id: "g3-2",
+                        label: "B相(3)",
+                        collapsed: true,
+                        img: "icon/ic_list.png",
+                        children: [
+                            { id: "g3-2-1",label: "000000000024",img: "icon/ic_meter.png"},
+                            { id: "g3-2-2",label: "000000000025",img: "icon/ic_meter.png"},
+                            { id: "g3-2-3",label: "000000000026" ,img: "icon/ic_meter.png"}
+                        ]
+                    },
+                    {
+                        id: "g3-3",
+                        label: "C相(2)",
+                        collapsed: true,
+                        img: "icon/ic_list.png",
+                        children: [
+                            { id: "g3-3-1",label: "000000000027",img: "icon/ic_meter.png"},
+                            { id: "g3-3-2",label: "000000000028",img: "icon/ic_meter.png"}]
+                    }
+                ]
+            }
+        ]
+    };
+
+
+    // 创建 G6 图实例
+    const graph = new G6.TreeGraph({
+        //图的  DOM 容器，可以传入该 DOM 的 id 或者直接传入容器的 HTML 节点对象
+        container: "container",
+        renderer:"svg",
+        //指定画布宽度，单位为 'px'
+        width,
+        //指定画布高度，单位为 'px'
+        height,
+        //是否开启画布自适应。开启后图自动适配画布大小
+        fitView: true,
+        fitCenter: true,
+        //最小缩放比例
+        minZoom: 0.2,
+        //最大缩放比例
+        maxZoom: 10,
+        //向 graph 注册插件
+        plugins: [],
+        //是否启用 stack，即是否开启 redo & undo 功能，该配置项 V3.6 及以上版本支持
+        enabledStack: true,
+        //设置画布的模式
+        modes: {
+            default: [{}]
+        },
+        //默认状态下节点的配置
+        defaultNode: {
+            type: "dom-node",
+            size: 25,
+            anchorPoints: [[0, 0.5], [1, 0.5]],
+            style: {
+                lineWidth: 2,
+                fill: "white",
+                stroke: "white"
+            }
+        },
+        //默认状态下边的配置
+        defaultEdge: {
+            type: "hvh",
+            style: {
+                stroke: "#A3B1BF"
+            }
+        },
+        //布局配置项
+        layout: {
+            type: "compactBox",
+            direction: "LR",
+            getId: function getId(d) {
+                return d.id;
+            },
+            getHeight: function getHeight() {
+                return 16;
+            },
+            getWidth: function getWidth() {
+                return 16;
+            },
+            getVGap: function getVGap() {
+                return 10;
+            },
+            getHGap: function getHGap() {
+                return 50;
+            }
+        }
+    });
+
+    //自定义节点
+    G6.registerNode('dom-node', {
+        afterDraw: (cfg, group) => {
+            const size = cfg.size;
+            const width = size-3;
+            const height = size-3;
+            const shape = group.addShape('dom', {
+                attrs: {
+                    x: -width / 2,
+                    y: -height / 2,
+                    width: width,
+                    height: height,
+                    html: `<img id=${cfg.id} class='dom-node' src=${cfg.img} width=${width} height=${height} onclick="listener(this)"/>`,
+                },
+                name: 'dom-shape',
+            });
+            return shape;
+        }
+    },'rect');
+
+
+    // // click listener for dom nodes to response the click by changing stroke color
+    const listener = (dom) => {
+        const nodeId = dom.id;
+        if (!nodeId) return;
+        const node = graph.findById(nodeId);
+        clickNode(node);
+    };
+
+
+    function updateNode(node, state) {
+        if (node != null) {
+            graph.updateItem(node.getID(), {
+                style: {
+                    stroke: state?strokeColor:'#ffffff'
+                },
+                labelCfg: {
+                    style: {
+                        fill: state?strokeColor:'#000000',
+                    }
+                }
+            });
+            graph.setItemState(node, "running", state);
+            const pEdge = node._cfg.edges[0];
+            const pNode = node._cfg.parent;
+            if (typeof pEdge != "undefined" && typeof pNode != "undefined") {
+                graph.setItemState(pEdge, "active", state);
+                // graph.setItemState(pNode, "running", state);
+                updateNode(pEdge._cfg.source, state);
+            }
+        }
+    }
+
+    function loadData(){
+        // 读取数据
+        graph.data(data);
+        // 渲染图
+        graph.render();
+        graph.fitView();
+    }
+
+    var tempNode = null;
+    function addActionHandler(nodeAddress) {
+        var list = graph.cfg.nodes;
+        for (var i = 0; i < list.length; i++) {
+            const node = list[i];
+            console.log(node._cfg.model.label+","+nodeAddress);
+            if (node._cfg.model.label === nodeAddress) {
+                clickNode(node,true);
+                return;
+            }
+            var children = node._cfg.model.children;
+            if (children) {
+                for (var j = 0; j < children.length; j++) {
+                    if (children[j].label === nodeAddress) {
+                        if(list[i]._cfg.model.collapsed==true){
+                            clickNode(node,true);
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // 鼠标移动到上面 running，移出结束
+    // graph.on("node:mouseenter", ev => {
+    //     const node = ev.item;
+    //     updateNode(tempNode, false);
+    //     tempNode = node;
+    //     updateNode(node, true);
+    // });
+
+    var tempNode = null;
+    graph.on("node:click", ev => {
+        const node = ev.item;
+        clickNode(node);
+    });
+
+    function clickNode(node,search){
+        if(tempNode){
+            updateNode(tempNode, false);
+            if(!search){
+                if(tempNode==node){
+                    tempNode = null;
+                    return;
+                }
+            }
+        }
+        tempNode = node;
+        updateNode(node, true);
+    }
+
+    // graph.on("node:mouseleave", ev => {
+    //     const node = ev.item;
+    //     graph.setItemState(node, "running", false);
+    //     updateNode(node, false)
+    // });
+
+    //线条颜色
+    let strokeColor = "#ff0000";
+
+    //自定义曲线
+    G6.registerEdge("hvh", {
+        // 绘制
+        draw(cfg, group) {
+            const startPoint = cfg.startPoint;
+            const endPoint = cfg.endPoint;
+            const shape = group.addShape("path", {
+                attrs: {
+                    stroke: "#333",
+                    lineWidth: 2,
+                    path: [
+                        ["M", startPoint.x, startPoint.y],
+                        ["L", endPoint.x / 3 + (2 / 3) * startPoint.x, startPoint.y],
+                        ["L", endPoint.x / 3 + (2 / 3) * startPoint.x, endPoint.y],
+                        ["L", endPoint.x, endPoint.y]
+                    ]
+                },
+                // must be assigned in G6 3.3 and later versions. it can be any value you want
+                name: "path-shape"
+            });
+            return shape;
+        },
+        // 响应状态变化
+        setState(name, value, item) {
+            const group = item.getContainer();
+            const shape = group.get("children")[0]; // 顺序根据 draw 时确定
+            if (name === "active") {
+                if (value) {
+                    // 曲线动画
+                    // const length = shape.getTotalLength();
+                    // shape.animate(
+                    //     ratio => {
+                    //         const startLen = ratio * length;
+                    //         const cfg = {
+                    //             lineDash: [startLen, length - startLen]
+                    //         };
+                    //         return cfg;
+                    //     },
+                    //     {
+                    //         repeat: true,
+                    //         duration: 2000
+                    //     }
+                    // );
+
+                    shape.attr("stroke", strokeColor);
+                    shape.attr("lineWidth", 3);
+                } else {
+                    // 结束动画
+                    // shape.stopAnimate();
+                    shape.attr("lineWidth", 2);
+                    shape.attr("stroke", "#333");
+                }
+            }
+        }
+    });
+    graph.node(function(node) {
+        return {
+            label: node.label,
+            labelCfg: {
+                position: node.children&&node.collapsed != true ? "top" : "right"
+            }
+        };
+    });
+    // 读取数据
+    graph.data(data);
+    // 渲染图
+    graph.render();
+    graph.fitView();
+</script>
+</html>
