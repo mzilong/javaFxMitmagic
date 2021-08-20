@@ -34,7 +34,7 @@ UsedUserAreasWarning=no
 ; 以下行取消注释，以在非管理安装模式下运行（仅为当前用户安装）。
 ;PrivilegesRequired=lowest  
 PrivilegesRequired=admin
-OutputDir={#MyAppPath}\output
+OutputDir={#MyAppPath}\target\{#MyAppBaseName}\windows
 OutputBaseFilename={#MyAppBaseName}_{#MyAppVersion}_setup
 SetupIconFile={#MyAppPath}\target\{#MyAppBaseName}\windows\{#MyAppBaseName}\{#MyAppIconName}
 ;Password=mitmagic
