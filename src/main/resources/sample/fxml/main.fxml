@@ -1,269 +1,250 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.*?>
+<?import javafx.scene.*?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 <?import org.controlsfx.control.*?>
 <?import sample.view.*?>
 
-<BorderPane prefHeight="700.0" prefWidth="1400.0" stylesheets="@../css/style.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.controller.MainController">
+<BorderPane prefHeight="700.0" prefWidth="1200.0" stylesheets="@../css/style.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.controller.MainController">
     <top>
-        <VBox>
-            <StackPane>
+        <VBox fx:id="vboxMain">
+            <StackPane VBox.vgrow="SOMETIMES">
                 <children>
-                    <MenuBar>
-                        <menus>
-                            <Menu mnemonicParsing="false" text="文件">
-                                <items>
-                                    <MenuItem mnemonicParsing="false" text="%New" />
-                                    <Menu mnemonicParsing="false" text="导出/导入操作">
-                                        <items>
-                                            <MenuItem mnemonicParsing="false" text="导出" />
-                                            <MenuItem mnemonicParsing="false" text="导入" />
-                                        </items>
-                                    </Menu>
-                                    <MenuItem mnemonicParsing="false" text="打开" />
-                                    <RadioMenuItem mnemonicParsing="false" text="单选项" />
-                                    <SeparatorMenuItem mnemonicParsing="false" />
-                                    <MenuItem mnemonicParsing="false" text="关闭" />
-                                </items>
-                            </Menu>
-                            <Menu mnemonicParsing="false" text="编辑">
-                                <items>
-                                    <MenuItem mnemonicParsing="false" text="删除" />
-                                    <CheckMenuItem mnemonicParsing="false" text="多选" />
-                                </items>
-                            </Menu>
-                            <Menu mnemonicParsing="false" text="工具">
-                                <items>
-                                    <MenuItem mnemonicParsing="false" onAction="#openSerialPort" text="串口调试" />
-                                </items>
-                            </Menu>
-                            <Menu mnemonicParsing="false" text="帮助">
-                                <items>
-                                    <MenuItem mnemonicParsing="false" text="关于">
-                                        <graphic>
-                                            <ImageView fitHeight="16" fitWidth="16" nodeOrientation="RIGHT_TO_LEFT">
-                                                <image>
-                                                    <Image url="@../img/ic_launcher.png" />
-                                                </image>
-                                            </ImageView>
-                                        </graphic>
-                                    </MenuItem>
-                                </items>
-                            </Menu>
-                        </menus>
-                    </MenuBar>
-                    <ColorPicker fx:id="colorPicker" onAction="#selectBgColor" StackPane.alignment="CENTER_RIGHT" />
+                    <TabPane>
+                        <tabs>
+                            <Tab closable="false" text="%Start">
+                                <content>
+                                      <AnchorPane fx:id="tAnchorPane">
+                                          <children>
+                                              <HBox layoutX="5.0" layoutY="5.0" spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                  <children>
+                                                      <AnchorPane>
+                                                          <children>
+                                                              <GridPane hgap="5.0" vgap="5.0">
+                                                                  <columnConstraints>
+                                                                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                                                                      <ColumnConstraints />
+                                                                      <ColumnConstraints />
+                                                                      <ColumnConstraints />
+                                                                      <ColumnConstraints />
+                                                                  </columnConstraints>
+                                                                  <rowConstraints>
+                                                                      <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                                                                      <RowConstraints />
+                                                                      <RowConstraints />
+                                                                  </rowConstraints>
+                                                                  <children>
+                                                                      <Label text="%SerialPortNumber" GridPane.columnIndex="0" GridPane.halignment="RIGHT" GridPane.rowIndex="0" />
+                                                                      <ComboBox fx:id="cbPortName" onAction="#onChange" prefWidth="150.0" promptText="%SerialPortNumber.Tip" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                                                                            </ComboBox>
+                                                                      <Label text="%BaudRate" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="0" />
+                                                                      <ComboBox fx:id="cbBaudRate" editable="true" onAction="#onChange" prefWidth="150.0" promptText="%BaudRate.Tip" GridPane.columnIndex="3" GridPane.rowIndex="0">
+                                                                            </ComboBox>
+                                                                      <Label text="%StopBit" GridPane.columnIndex="0" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
+                                                                      <ComboBox fx:id="cbStopBits" onAction="#onChange" prefWidth="150.0" promptText="%StopBit.Tip" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                                                            </ComboBox>
+                                                                      <Label text="%Parity" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
+                                                                      <ComboBox fx:id="cbParity" onAction="#onChange" prefWidth="150.0" promptText="%Parity.Tip" GridPane.columnIndex="3" GridPane.rowIndex="1">
+                                                                            </ComboBox>
+                                                                      <Label text="%DataBit" GridPane.columnIndex="0" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
+                                                                      <ComboBox fx:id="cbDataBits" onAction="#onChange" prefWidth="150.0" promptText="%DataBit.Tip" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                                                                            </ComboBox>
+                                                                      <Label text="%FlowControl" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
+                                                                      <ComboBox fx:id="cbFlowcontrol" onAction="#onChange" prefWidth="150.0" promptText="%FlowControl.Tip" GridPane.columnIndex="3" GridPane.rowIndex="2">
+                                                                            </ComboBox>
+                                                                      <Button fx:id="btnConfigurePort" mnemonicParsing="false" onAction="#onButtonClick" prefHeight="80.0" text="%ConfigureThePort" GridPane.columnIndex="4" GridPane.rowIndex="0" GridPane.rowSpan="3">
+                                                                          <graphic>
+                                                                              <Icon styleClass="el-icon-connection" />
+                                                                          </graphic>
+                                                                          <font>
+                                                                              <Font size="18.0" />
+                                                                          </font>
+                                                                      </Button>
+                                                                  </children>
+                                                              </GridPane>
+                                                              <Label alignment="CENTER" text="%CommunicationInterface" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
+                                                          </children>
+                                                      </AnchorPane>
+                                                      <Separator orientation="VERTICAL" prefHeight="120.0" />
+                                                      <AnchorPane>
+                                                          <children>
+                                                              <HBox spacing="5.0">
+                                                                  <children>
+                                                                      <Button fx:id="btnStart" mnemonicParsing="false" onAction="#onButtonClick" prefHeight="60.0" text="%StartCommunication">
+                                                                          <graphic>
+                                                                              <Icon styleClass="el-icon-circle-check" />
+                                                                          </graphic>
+                                                                      </Button>
+                                                                      <Button fx:id="btnStop" mnemonicParsing="false" onAction="#onButtonClick" prefHeight="60.0" text="%StopCommunication">
+                                                                          <graphic>
+                                                                              <Icon styleClass="el-icon-circle-close" />
+                                                                          </graphic>
+                                                                      </Button>
+                                                                  </children>
+                                                              </HBox>
+                                                              <Label alignment="CENTER" text="%Operational" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
+                                                          </children>
+                                                      </AnchorPane>
+                                                      <Separator orientation="VERTICAL" prefHeight="120.0" />
+                                                      <AnchorPane>
+                                                          <children>
+                                                              <HBox spacing="5.0">
+                                                                  <children>
+                                                                      <HBox spacing="5.0">
+                                                                          <children>
+                                                                              <Label maxHeight="1.7976931348623157E308" text="%RequestTime" />
+                                                                              <ComboBox fx:id="cbRequestTime" editable="true" onAction="#onChange" promptText="%RequestTime.Tip" />
+                                                                          </children>
+                                                                      </HBox>
+                                                                  </children>
+                                                              </HBox>
+                                                              <Label alignment="CENTER" text="%Other" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
+                                                          </children>
+                                                      </AnchorPane>
+                                                  </children>
+                                              </HBox>
+                                          </children>
+                              <padding>
+                                 <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                              </padding>
+                                      </AnchorPane>
+                                </content>
+                            </Tab>
+                            <Tab closable="false" text="%Tool">
+                                <content>
+                                    <AnchorPane fx:id="tAnchorPane2">
+                                        <children>
+                                            <HBox layoutX="5.0" layoutY="5.0" spacing="5.0">
+                                                <children>
+                                                    <Button fx:id="btnOpenSerialPort" onAction="#onButtonClick" prefHeight="50.0" text="%Title.SerialDebug">
+                                                        <graphic>
+                                                            <Icon styleClass="el-icon-set-up" />
+                                                        </graphic>
+                                                    </Button>
+                                                    <Button fx:id="btnOpenCalculator" onAction="#onButtonClick" prefHeight="50.0" text="%Calculator">
+                                                        <graphic>
+                                                            <Icon styleClass="el-icon-s-platform" />
+                                                        </graphic>
+                                                    </Button>
+                                                    <Button fx:id="btnOpenIcon" onAction="#onButtonClick" prefHeight="50.0" text="%Title.IconManagement">
+                                                        <graphic>
+                                                            <Icon styleClass="el-icon-info" />
+                                                        </graphic>
+                                                    </Button>
+                                                </children>
+                                            </HBox>
+
+                                        </children>
+                                        <padding>
+                                            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                                        </padding>
+                                    </AnchorPane>
+                                </content>
+                            </Tab>
+                        </tabs>
+                        <opaqueInsets>
+                            <Insets />
+                        </opaqueInsets>
+                        <cursor>
+                            <Cursor fx:constant="DEFAULT" />
+                        </cursor>
+                    </TabPane>
+                    <HBox maxHeight="-Infinity" maxWidth="-Infinity" StackPane.alignment="TOP_RIGHT">
+                        <Label maxHeight="1.7976931348623157E308" text="%Language">
+                            <HBox.margin>
+                                <Insets right="5.0" />
+                            </HBox.margin>
+                        </Label>
+                        <ComboBox fx:id="cbLanguage" onAction="#onChange" prefWidth="150.0" promptText="">
+                            <HBox.margin>
+                                <Insets right="10.0" />
+                            </HBox.margin>
+                        </ComboBox>
+                        <Label maxHeight="1.7976931348623157E308" text="%Font">
+                            <HBox.margin>
+                                <Insets right="5.0" />
+                            </HBox.margin>
+                        </Label>
+                        <ComboBox fx:id="cbFont" onAction="#onChange" prefWidth="150.0" promptText="">
+                            <HBox.margin>
+                                <Insets right="10.0" />
+                            </HBox.margin>
+                        </ComboBox>
+                        <Label alignment="CENTER" maxHeight="1.7976931348623157E308" text="%Theme">
+                            <HBox.margin>
+                                <Insets right="5.0" />
+                            </HBox.margin>
+                        </Label>
+                        <ColorPicker fx:id="colorPicker" onAction="#selectBgColor">
+                            <HBox.margin>
+                                <Insets />
+                            </HBox.margin>
+                        </ColorPicker>
+                        <StackPane.margin>
+                            <Insets bottom="3.0" left="3.0" right="3.0" top="3.0" />
+                        </StackPane.margin>
+                    </HBox>
                 </children>
             </StackPane>
-            <BreadCrumbBar fx:id="breadCrumbBar" VBox.vgrow="ALWAYS" />
+            <BreadCrumbBar fx:id="breadCrumbBar" />
         </VBox>
     </top>
     <center>
-        <SplitPane dividerPositions="0.75" orientation="VERTICAL" BorderPane.alignment="CENTER" VBox.vgrow="ALWAYS">
+        <SplitPane orientation="VERTICAL" BorderPane.alignment="CENTER" VBox.vgrow="ALWAYS">
             <items>
                 <AnchorPane>
                     <children>
-                        <SplitPane dividerPositions="0.2" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                        <SplitPane dividerPositions="0.25" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                             <items>
                                 <AnchorPane>
                                     <children>
-                                        <TreeView fx:id="treeView" editable="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                            <root>
-                                                <TreeItem expanded="true" value="编程">
+                                        <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                            <children>
+                                                <GridPane hgap="5.0" vgap="5.0">
+                                                    <columnConstraints>
+                                                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                                                        <ColumnConstraints />
+                                                    </columnConstraints>
+                                                    <rowConstraints>
+                                                        <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                                                        <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                                                    </rowConstraints>
                                                     <children>
-                                                        <TreeItem expanded="true" value="开发工具">
-                                                            <children>
-                                                                <TreeItem value="Eclipse" />
-                                                                <TreeItem value="InteliJ IDEA" />
-                                                                <TreeItem value="Android Studio" />
-                                                                <TreeItem value="PyCharm" />
-                                                                <TreeItem value="PhpStorm" />
-                                                                <TreeItem value="WebStorm" />
-                                                                <TreeItem value="Clion" />
-                                                            </children>
-                                                        </TreeItem>
-                                                        <TreeItem expanded="true" value="移动端">
-                                                            <children>
-                                                                <TreeItem value="android" />
-                                                                <TreeItem value="Kotlin" />
-                                                                <TreeItem value="swift" />
-                                                                <TreeItem value="object-c" />
-                                                                <TreeItem value="ionic" />
-                                                                <TreeItem value="apicloud" />
-                                                                <TreeItem value="dcloud" />
-                                                                <TreeItem value="jquery" />
-                                                            </children>
-                                                        </TreeItem>
-                                                        <TreeItem expanded="true" value="前端">
-                                                            <children>
-                                                                <TreeItem value="JavaScript" />
-                                                                <TreeItem value="html" />
-                                                                <TreeItem value="css" />
-                                                            </children>
-                                                        </TreeItem>
-                                                        <TreeItem expanded="true" value="服务端">
-                                                            <children>
-                                                                <TreeItem value="python" />
-                                                                <TreeItem value="linux" />
-                                                                <TreeItem value="jsp" />
-                                                                <TreeItem value="asp" />
-                                                                <TreeItem value="php" />
-                                                                <TreeItem value="ruby" />
-                                                                <TreeItem value="docker" />
-                                                                <TreeItem value="go" />
-                                                                <TreeItem value="java" />
-                                                                <TreeItem value="c" />
-                                                                <TreeItem value="c++" />
-                                                            </children>
-                                                        </TreeItem>
-                                                        <TreeItem expanded="true" value="数据库">
-                                                            <children>
-                                                                <TreeItem value="sql" />
-                                                                <TreeItem value="mysql" />
-                                                                <TreeItem value="sqlite" />
-                                                                <TreeItem value="oracle" />
-                                                                <TreeItem value="PostgreSQL" />
-                                                                <TreeItem value="MongoDB" />
-                                                            </children>
-                                                        </TreeItem>
+                                                        <Label text="%SourceAddress">
+                                                            <graphic>
+                                                                <Icon styleClass="el-icon-bangzhu" />
+                                                            </graphic>
+                                                        </Label>
+                                                        <TextField fx:id="tfSourceAddress" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" />
+                                                        <Label text="%DestinationAddress" GridPane.rowIndex="1">
+                                                            <graphic>
+                                                                <Icon styleClass="el-icon-aim" />
+                                                            </graphic>
+                                                        </Label>
+                                                        <TextField fx:id="tfDestinationAddress" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" />
                                                     </children>
-                                                </TreeItem>
-                                            </root>
-                                        </TreeView>
+                                                    <VBox.margin>
+                                                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                                                    </VBox.margin>
+                                                </GridPane>
+                                                <TreeView fx:id="treeView" editable="true" VBox.vgrow="ALWAYS">
+                                                </TreeView>
+                                            </children>
+                                        </VBox>
                                     </children>
                                 </AnchorPane>
-                                <SplitPane dividerPositions="1.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                    <AnchorPane>
-                                        <children>
-                                            <HBox layoutX="-49.599998474121094" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                                <children>
-                                                    <Browser fx:id="broeser" prefWidth="227.0" HBox.hgrow="ALWAYS">
-
-                                                    </Browser>
-                                                </children>
-                                            </HBox>
-                                        </children>
-                                    </AnchorPane>
-                                    <AnchorPane>
-                                        <children>
-                                            <Pane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                                <Accordion AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                                    <panes>
-                                                        <TitledPane text="分组一">
-                                                            <content>
-                                                            </content>
-                                                        </TitledPane>
-                                                        <TitledPane text="分组二">
-                                                            <content>
-                                                            </content>
-                                                        </TitledPane>
-                                                        <TitledPane text="分组三">
-                                                            <content>
-                                                            </content>
-                                                        </TitledPane>
-                                                    </panes>
-                                                </Accordion>
-                                            </Pane>
-                                        </children>
-                                    </AnchorPane>
-                                </SplitPane>
+                                <StackPane fx:id="container">
+                                    <children>
+                                    </children>
+                                </StackPane>
                             </items>
                         </SplitPane>
-                    </children>
-                </AnchorPane>
-                <AnchorPane prefHeight="200.0">
-                    <children>
-                        <TabPane tabClosingPolicy="ALL_TABS" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                            <tabs>
-                                <Tab text="选卡一">
-                                    <content>
-                                        <AnchorPane fx:id="tAnchorPane">
-                                            <children>
-
-                                            </children>
-                                        </AnchorPane>
-                                    </content>
-                                </Tab>
-                                <Tab text="选卡二">
-                                    <content>
-                                        <AnchorPane fx:id="tAnchorPane2">
-                                            <children>
-                                            </children>
-                                        </AnchorPane>
-                                    </content>
-                                </Tab>
-                            </tabs>
-                        </TabPane>
                     </children>
                 </AnchorPane>
             </items>
         </SplitPane>
     </center>
-    <left>
-      <AnchorPane>
-         <children>
-            <TabPane prefWidth="30.0" side="LEFT" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-              <tabs>
-                <Tab text="项目">
-                  <content>
-                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
-                  </content>
-                </Tab>
-                <Tab text="其他">
-                  <content>
-                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
-                  </content>
-                </Tab>
-              </tabs>
-            </TabPane>
-         </children>
-      </AnchorPane>
-    </left>
-   <right>
-      <TabPane prefWidth="30.0" side="RIGHT" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
-        <tabs>
-          <Tab text="Maven">
-            <content>
-              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
-            </content>
-          </Tab>
-          <Tab text="ant">
-            <content>
-              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
-            </content>
-          </Tab>
-        </tabs>
-      </TabPane>
-   </right>
-   <bottom>
-      <VBox BorderPane.alignment="CENTER">
-         <children>
-            <TabPane prefHeight="100.0" side="BOTTOM" tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS">
-              <tabs>
-                <Tab text="Run">
-                  <content>
-                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                      </AnchorPane>
-                  </content>
-                </Tab>
-                <Tab text="Dubug">
-                  <content>
-                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
-                  </content>
-                </Tab>
-                <Tab text="终端">
-                  <content>
-                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
-                  </content>
-                </Tab>
-              </tabs>
-               <VBox.margin>
-                  <Insets />
-               </VBox.margin>
-            </TabPane>
-         </children></VBox>
-   </bottom>
 </BorderPane>

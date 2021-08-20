@@ -2,9 +2,11 @@ package sample.controller.base;
 
 import javafx.event.EventHandler;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
@@ -12,12 +14,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sample.event.BaseEvent;
 import sample.event.FxEventBus;
+import sample.tools.PreferencesTools;
+import sample.tools.dialog.Message;
+import sample.tools.dialog.Notification;
 import sample.utils.javafx.FxIntent;
 import sample.utils.javafx.FxStyleUtils;
 import sample.utils.javafx.JFXUtils;
 import sample.view.JFXDecorator;
-
-import java.util.prefs.Preferences;
 
 /**
  * @author mzl
@@ -27,18 +30,10 @@ import java.util.prefs.Preferences;
 public abstract class BaseController implements Initializable, EventHandler<BaseEvent> {
     public final Logger logger = LoggerFactory.getLogger(this.getClass());
     private Stage primaryStage;
-    public Preferences preferences;
+    private Parent root;
+    public static boolean ELEMENT_STYLE = false;
 
     public BaseController() {
-        this.preferences = Preferences.userRoot();
-    }
-
-    public String getFxBasePref() {
-        return preferences.get("-fx-base","#0091ea");
-    }
-
-    public void setFxBasePref(String value) {
-        preferences.put("-fx-base",value);
     }
 
     private FxIntent intent;
@@ -56,8 +51,8 @@ public abstract class BaseController implements Initializable, EventHandler<Base
         primaryStage.setOnHiding(this::onHiding);
         primaryStage.setOnShowing(this::onShowing);
         primaryStage.setTitle(initTitle());
-        Parent root = intent.getRoot();
-        FxStyleUtils.setBase(root,getFxBasePref());
+        root = intent.getRoot();
+        FxStyleUtils.setBase(root,PreferencesTools.getFxBasePref());
         String iconName = initIcon();
         if (iconName != null) {
             Image icon = JFXUtils.getImg(iconName);
@@ -89,7 +84,6 @@ public abstract class BaseController implements Initializable, EventHandler<Base
 //        ControllersManagement.removeController(this.getClass());
         //默认移除事件处理程序
         FxEventBus.getDefault().removeEventHandler(BaseEvent.BASE_EVENT, this);
-        this.preferences = null;
     }
     /**
      * 在窗口关闭之后调用，子类可以覆盖实现
@@ -106,4 +100,104 @@ public abstract class BaseController implements Initializable, EventHandler<Base
      * @return 字符串
      */
     public abstract String initIcon();
+
+    public  <T extends Node> T findView(Node node,String id){
+        return (T)node.lookup(id);
+    }
+
+    /**
+     * @return 视图根对象
+     */
+    public Parent getRoot() {
+        return root;
+    }
+
+    /**
+     * 显示一则默认类型默认延迟的消息
+     *
+     * @param message 通知信息
+     */
+    protected void showMessage(String message) {
+        showMessage(message, Message.Type.INFO);
+    }
+
+    /**
+     * 显示一则指定类型默认延迟的消息
+     *
+     * @param message 通知信息
+     */
+    protected void showMessage(String message, Message.Type type) {
+        showMessage(message, type, Message.DEFAULT_DELAY);
+    }
+
+    /**
+     * 显示一则默认类型指定延迟的消息
+     *
+     * @param message 通知信息
+     */
+    protected void showMessage(String message, long delay) {
+        showMessage(message, Message.Type.INFO, delay);
+    }
+
+    /**
+     * 显示一则指定类型指定延迟的消息
+     *
+     * @param message 通知信息
+     */
+    protected void showMessage(String message, Message.Type type, long delay) {
+        Parent root = getRoot();
+        if (!(root instanceof Pane)) {
+            System.err.println("owner 必须是 Pane 或其子类");
+            return;
+        }
+        Message.show((Pane) root, message, type, delay);
+    }
+
+    /**
+     * 显示一则默认类型的通知， 用户手动关闭
+     *
+     * @param message 通知信息
+     */
+    protected void showNotification(String message) {
+        showNotification(message, Notification.Type.INFO);
+    }
+
+    /**
+     * 显示一则指定类型的通知，用户手动关闭
+     *
+     * @param message 通知信息
+     * @param type    通知类型
+     */
+    protected void showNotification(String message, Notification.Type type) {
+        showNotification(message, type, 0);
+    }
+
+    /**
+     * 显示一则指定类型的通知，自动关闭，默认显示一秒
+     *
+     * @param message 通知信息
+     */
+    protected void showNotificationAutoClose(String message) {
+        showNotificationAutoClose(message, Notification.Type.INFO);
+    }
+
+    protected void showNotificationAutoClose(String message, Notification.Type type) {
+        showNotification(message, type, Notification.DEFAULT_DELAY);
+    }
+
+    /**
+     * 显示一则指定类型的通知，自动关闭，指定显示时间
+     *
+     * @param message      通知信息
+     * @param type         通知类型
+     * @param milliseconds 延迟时间 毫秒
+     */
+    protected void showNotification(String message, Notification.Type type, long milliseconds) {
+        Parent root = getRoot();
+        if (!(root instanceof Pane)) {
+            System.err.println("owner 必须是 Pane 或其子类");
+            return;
+        }
+        Notification.showAutoClose((Pane) root, message, type, milliseconds);
+    }
 }

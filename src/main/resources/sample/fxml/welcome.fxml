@@ -1,16 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<FlowPane alignment="CENTER" orientation="VERTICAL" prefHeight="350.0" prefWidth="560.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.controller.WelcomeController">
+<FlowPane alignment="CENTER" columnHalignment="CENTER" orientation="VERTICAL" prefHeight="350.0" prefWidth="560.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.controller.WelcomeController">
     <children>
               <Label fx:id="lab" alignment="CENTER" onMouseClicked="#onLabelClick" text="%Title.Welcome" textAlignment="CENTER">
                   <font>
                       <Font name="System Bold" />
                   </font>
               </Label>
-              <ProgressBar fx:id="progressBar" progress="0" />
+              <ProgressIndicator fx:id="progressIndicator" progress="0">
+         <FlowPane.margin>
+            <Insets top="10.0" />
+         </FlowPane.margin></ProgressIndicator>
     </children>
 </FlowPane>

@@ -699,38 +699,50 @@ public class JFXDecorator extends VBox {
             return;
         }
 
-        double x = mouseEvent.getSceneX();
+        double x = Math.ceil(Double.parseDouble(df.format(mouseEvent.getSceneX())));
         double y = mouseEvent.getSceneY();
         double width = this.getWidth();
         double height = this.getHeight();
+        double rightInset = this.snappedRightInset()/2;
+        double leftInset = this.snappedLeftInset()/2;
+        double topInset = this.snappedTopInset()/2;
+        double bottomInset = this.snappedBottomInset()/2;
+        double right = Math.ceil(width - rightInset);
+        double bottom = Math.ceil(height - bottomInset);
+
         Cursor cursorType = Cursor.DEFAULT;
         if (this.getBorder() != null && this.getBorder().getStrokes().size() > 0) {
-            if(x <= this.snappedLeftInset() && y <= this.snappedTopInset()){
-                cursorType = Cursor.NW_RESIZE;
-            } else if (x >= width - this.snappedRightInset() && y <= this.snappedTopInset()) {
-                cursorType = Cursor.NE_RESIZE;
-            } else if(x <= this.snappedLeftInset() && y >= height - this.snappedBottomInset()){
-                cursorType = Cursor.SW_RESIZE;
-            } else if (x >= width - this.snappedRightInset() && y >= height - this.snappedBottomInset()) {
-                cursorType = Cursor.SE_RESIZE;
-            } else if(y <= this.snappedTopInset()){
-                cursorType = Cursor.N_RESIZE;
-            } else if (y >= height - this.snappedBottomInset()) {
-                cursorType = Cursor.S_RESIZE;
-            } else if(x <= this.snappedLeftInset()){
+            if(y < topInset){
+                if(x < leftInset){
+                    cursorType = Cursor.NW_RESIZE;
+                } else if (x > right) {
+                    cursorType = Cursor.NE_RESIZE;
+                } else {
+                    cursorType = Cursor.N_RESIZE;
+                }
+            } else if (y > bottom) {
+                if(x < leftInset){
+                    cursorType = Cursor.SW_RESIZE;
+                } else if (x > right) {
+                    cursorType = Cursor.SE_RESIZE;
+                } else {
+                    cursorType = Cursor.S_RESIZE;
+                }
+            } else if(x < leftInset){
                 if(allowMove){
                     buttonsContainer.setCursor(Cursor.W_RESIZE);
                 }
                 cursorType = Cursor.W_RESIZE;
-            } else if (x >= width - this.snappedRightInset()) {
+            } else if (x > right) {
                 cursorType = Cursor.E_RESIZE;
             }else{
                 if(allowMove){
                     buttonsContainer.setCursor(Cursor.MOVE);
                 }
             }
-            this.setCursor(cursorType);
         }
+        this.setCursor(cursorType);
+//        System.out.println("x:"+x+",y="+y+",w="+width+",h="+height+",r="+right+",b="+bottom+"-------->"+this.getCursor().toString());
     }
 
     /**

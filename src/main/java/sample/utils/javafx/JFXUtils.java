@@ -2,6 +2,7 @@ package sample.utils.javafx;
 
 import com.jfoenix.controls.JFXSnackbar;
 import javafx.application.Platform;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
@@ -27,6 +28,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.NoSuchFileException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -470,5 +472,25 @@ public class JFXUtils {
             window.setUserData(map);
         }
         map.put(key, value);
+    }
+
+    public static <T> T getParent(Class<?> viewType) {
+        URL url= null;
+        try {
+            url = FxmlUtils.createFxmlPath(viewType);
+        } catch (NoSuchFileException e) {
+            e.printStackTrace();
+        }
+        return getParent(url);
+    }
+
+    public static <T> T getParent(URL url) {
+        FXMLLoader loader = FxmlUtils.loadFxmlFromResource(url, ControlResources.getResourceBundle(null));
+        return loader.getRoot();
+    }
+
+    public static <T> T getParent(String url) {
+        FXMLLoader loader = FxmlUtils.loadFxmlFromResource(url,ControlResources.getResourceBundle(null));
+        return loader.getRoot();
     }
 }

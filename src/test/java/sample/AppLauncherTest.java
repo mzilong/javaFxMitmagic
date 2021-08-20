@@ -7,6 +7,6 @@ package sample;
  */
 public class AppLauncherTest {
     public static void main(String[] args) {
-        TransformResourcesTest.main(args);
+        JavaFXTest.main(args);
     }
 }

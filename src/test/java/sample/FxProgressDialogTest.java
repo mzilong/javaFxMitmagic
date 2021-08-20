@@ -1,7 +1,9 @@
 package sample;
 
+import com.jfoenix.controls.JFXDecorator;
 import javafx.application.Application;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import sample.tools.dialog.FxProgressDialog;
@@ -18,13 +20,14 @@ public class FxProgressDialogTest extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        primaryStage.setScene(new Scene(
-            hbox(50, 10, Pos.CENTER,
+
+        Node hbox= hbox(50, 10, Pos.CENTER,
                 button("展示数字进度", () -> startProgress1(primaryStage, false)),
                 button("展示百分比进度", () -> startProgress1(primaryStage, true)),
                 button("不展示进度", () -> startProgress2(primaryStage))
-            )
-        ));
+        );
+        JFXDecorator jfxDecorator = new JFXDecorator(primaryStage,hbox);
+        primaryStage.setScene(new Scene(jfxDecorator));
         primaryStage.show();
     }
 

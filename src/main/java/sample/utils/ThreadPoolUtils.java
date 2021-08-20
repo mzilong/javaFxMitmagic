@@ -15,8 +15,8 @@ public class ThreadPoolUtils {
      * 开启一个线程池来运行
      * @param runnable 可运行任务
      */
-    public static void runDelayTime(Runnable runnable){
-        runDelayTime(runnable,0);
+    public static ScheduledThreadPoolExecutor runDelayTime(Runnable runnable){
+        return runDelayTime(runnable,0);
     }
 
     /**
@@ -24,8 +24,8 @@ public class ThreadPoolUtils {
      * @param runnable 可运行任务
      * @param delay 延迟多少毫秒
      */
-    public static void runDelayTime(Runnable runnable,long delay){
-        runDelayTime(runnable,delay,TimeUnit.MILLISECONDS);
+    public static ScheduledThreadPoolExecutor runDelayTime(Runnable runnable,long delay){
+        return runDelayTime(runnable,delay,TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -34,18 +34,20 @@ public class ThreadPoolUtils {
      * @param delay 延迟多少时间
      * @param timeUnit 时间单位
      */
-    public static void runDelayTime(Runnable runnable,long delay,TimeUnit timeUnit){
+    public static ScheduledThreadPoolExecutor runDelayTime(Runnable runnable,long delay,TimeUnit timeUnit){
         ScheduledThreadPoolExecutor stpExecutor = new ScheduledThreadPoolExecutor(1);
         stpExecutor.schedule(runnable,delay, timeUnit);
+        return stpExecutor;
     }
 
     /**
      * 开启ExecutorService服务来运行
      * @param runnable 可运行任务
      */
-    public static void runExecutorService(Runnable runnable){
+    public static ExecutorService runExecutorService(Runnable runnable){
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         executorService.submit(runnable);
+        return executorService;
     }
 
     /**

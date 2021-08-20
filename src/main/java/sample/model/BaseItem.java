@@ -11,6 +11,12 @@ public class BaseItem<T> {
         this.name = name;
         this.value = value;
     }
+
+    public BaseItem(int id, T value) {
+        this.id = id;
+        this.value = value;
+    }
+
     public BaseItem(String name, T value) {
         this.name = name;
         this.value = value;

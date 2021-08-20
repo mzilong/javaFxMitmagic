@@ -1,6 +1,7 @@
 package sample.utils;
 
 import com.fazecast.jSerialComm.SerialPort;
+import sample.locale.ControlResources;
 
 /**
  * @name SerialPortParameter
@@ -34,19 +35,24 @@ public final class SerialPortParameter {
     public static final float ONE_POINT_FIVE_STOP_BITS = 1.5f;
     public static final float TWO_STOP_BITS = 2;
 
-    public static final String PARITY_NONE = "None";
+    public static final String PARITY_NONE = ControlResources.getString("None");
     public static final String PARITY_ODD = "Odd";
     public static final String PARITY_EVEN = "Even";
     public static final String PARITY_MARK = "Mark";
     public static final String PARITY_SPACE = "Space";
 
-    public static final String FLOW_CONTROL_DISABLED = "无";
+    public static final String FLOW_CONTROL_DISABLED = ControlResources.getString("None");
     public static final String FLOW_CONTROL_RTS_ENABLED = "RTS";
     public static final String FLOW_CONTROL_CTS_ENABLED = "CTS";
     public static final String FLOW_CONTROL_DSR_ENABLED = "DSR";
     public static final String FLOW_CONTROL_DTR_ENABLED = "DTR";
     public static final String FLOW_CONTROL_XONXOFF_IN_ENABLED = "XONXOFF_IN";
     public static final String FLOW_CONTROL_XONXOFF_OUT_ENABLED = "XONXOFF_OUT";
+
+
+    public static final String CRC_NONE = ControlResources.getString("None");
+    public static final String CRC_16_MODBUS = "CRC-16/MODBUS";
+    public static final String CHECKSUM_8 = "CHECKSUM-8";
 
     /**
      * 串口名称(COM0、COM1、COM2等等)
@@ -126,7 +132,7 @@ public final class SerialPortParameter {
 
     public SerialPortParameter(String portName) {
         this.portName = portName;
-        this.baudRate = SerialPortParameter.BAUDRATE_2400;
+        this.baudRate = SerialPortParameter.BAUDRATE_9600;
         this.dataBits = SerialPortParameter.DATABITS_8;
         this.stopBits = SerialPort.ONE_STOP_BIT;
         this.parity = SerialPort.EVEN_PARITY;
@@ -213,9 +219,6 @@ public final class SerialPortParameter {
 
     public int setFlowcontrolStr(String txt){
         switch (txt){
-            case FLOW_CONTROL_DISABLED:
-                flowcontrol = SerialPort.FLOW_CONTROL_DISABLED;
-                break;
             case FLOW_CONTROL_RTS_ENABLED:
                 flowcontrol = SerialPort.FLOW_CONTROL_RTS_ENABLED;
                 break;
@@ -240,9 +243,6 @@ public final class SerialPortParameter {
 
     public int setParityStr(String txt){
         switch (txt){
-            case PARITY_NONE:
-                parity = SerialPort.NO_PARITY;
-                break;
             case PARITY_ODD:
                 parity = SerialPort.ODD_PARITY;
                 break;

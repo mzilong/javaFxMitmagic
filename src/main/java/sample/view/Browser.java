@@ -5,8 +5,6 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.concurrent.Worker.State;
 import javafx.event.ActionEvent;
-import javafx.event.Event;
-import javafx.event.EventHandler;
 import javafx.geometry.HPos;
 import javafx.geometry.Pos;
 import javafx.geometry.VPos;
@@ -18,9 +16,16 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
-import javafx.scene.web.*;
+import javafx.scene.web.WebEngine;
+import javafx.scene.web.WebHistory;
+import javafx.scene.web.WebView;
 import netscape.javascript.JSObject;
-
+/**
+ * 浏览器控件
+ * @author: MI
+ * Description:Browser
+ * Data: 2021/8/20 10:24
+ */
 public class Browser extends Region {
  
     private final HBox toolBar;
@@ -29,7 +34,7 @@ public class Browser extends Region {
     final WebEngine webEngine = webView.getEngine();
     final Button toggleHelpTopics = new Button("Toggle Help Topics");
     final Button btnPrint = new Button("Print");
-    final ComboBox comboBox = new ComboBox();
+    final ComboBox<String> comboBox = new ComboBox<>();
 
     public Browser() {
         //apply the styles
@@ -46,18 +51,13 @@ public class Browser extends Region {
         toolBar.getChildren().add(createSpacer());
         toolBar.getChildren().add(toggleHelpTopics);
         //set action for the button
-        toggleHelpTopics.setOnAction((ActionEvent t) -> {
-            webEngine.executeScript("addActionHandler('000000000020')");
-        });
+        toggleHelpTopics.setOnAction((ActionEvent t) -> webEngine.executeScript("addActionHandler('000000000020')"));
         webView.setFontScale(1);
-        webEngine.setOnAlert(new EventHandler<WebEvent<String>>() {
-            @Override
-            public void handle(WebEvent<String> event) {
-                Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                alert.setHeaderText("温馨提示");
-                alert.setContentText(event.getData());
-                alert.showAndWait();
-            }
+        webEngine.setOnAlert(event -> {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setHeaderText("温馨提示");
+            alert.setContentText(event.getData());
+            alert.showAndWait();
         });
 
         //process history
@@ -65,16 +65,12 @@ public class Browser extends Region {
         history.getEntries().addListener(
             (ListChangeListener.Change<? extends WebHistory.Entry> c) -> {
                 c.next();
-                c.getRemoved().stream().forEach((e) -> {
-                    comboBox.getItems().remove(e.getUrl());
-                });
-                c.getAddedSubList().stream().forEach((e) -> {
-                    comboBox.getItems().add(e.getUrl());
-                });
+                c.getRemoved().forEach((e) -> comboBox.getItems().remove(e.getUrl()));
+                c.getAddedSubList().forEach((e) -> comboBox.getItems().add(e.getUrl()));
         });
  
         //set the behavior for the history combobox               
-        comboBox.setOnAction((Event ev) -> {
+        comboBox.setOnAction((ActionEvent ev) -> {
             int offset
                     = comboBox.getSelectionModel().getSelectedIndex()
                     - history.getCurrentIndex();

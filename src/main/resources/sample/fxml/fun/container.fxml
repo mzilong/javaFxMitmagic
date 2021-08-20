@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import sample.view.*?>
+
+<AnchorPane style="-fx-background-color: -fx-background" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.controller.MainController">
+    <children>
+        <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <TextArea fx:id="textArea" prefHeight="200.0" text="00 0C 00 74 C0" VBox.vgrow="ALWAYS" />
+            <AnchorPane>
+                <children>
+                    <HBox>
+                        <Button fx:id="btnCopy" mnemonicParsing="false" onAction="#onButtonClick" prefHeight="50.0" prefWidth="100.0" text="%Copy">
+                            <graphic>
+                                <Icon styleClass="el-icon-document-copy" />
+                            </graphic>
+                        </Button>
+                        <Button fx:id="btnPaste" mnemonicParsing="false" onAction="#onButtonClick" prefHeight="50.0" prefWidth="100.0" text="%Paste">
+                            <graphic>
+                                <Icon styleClass="el-icon-document-add" />
+                            </graphic>
+                        </Button>
+                        <Button fx:id="btnSelectAll" mnemonicParsing="false" onAction="#onButtonClick" prefHeight="50.0" prefWidth="100.0" text="%SelectAll">
+                            <graphic>
+                                <Icon styleClass="el-icon-document-checked" />
+                            </graphic>
+                        </Button>
+                        <Button fx:id="btnClear" mnemonicParsing="false" onAction="#onButtonClick" prefHeight="50.0" prefWidth="100.0" text="%Empty">
+                            <graphic>
+                                <Icon styleClass="el-icon-document-delete" />
+                            </graphic>
+                        </Button>
+                        <Button fx:id="btnClearAll" mnemonicParsing="false" onAction="#onButtonClick" prefHeight="50.0" prefWidth="100" text="%EmptyAll">
+                            <graphic>
+                                <Icon styleClass="el-icon-delete" />
+                            </graphic>
+                        </Button>
+                    </HBox>
+                    <Button fx:id="btnSend" prefHeight="50.0" prefWidth="180.0" text="%Send" visible="false" AnchorPane.rightAnchor="0.0">
+                        <graphic>
+                            <Icon styleClass="el-icon-success" />
+                        </graphic>
+                        <font>
+                            <Font size="24.0" />
+                        </font>
+                    </Button>
+                </children>
+            </AnchorPane>
+            <TextArea fx:id="textAreaShow" editable="false" prefHeight="200.0" VBox.vgrow="ALWAYS" />
+        </VBox>
+    </children>
+</AnchorPane>

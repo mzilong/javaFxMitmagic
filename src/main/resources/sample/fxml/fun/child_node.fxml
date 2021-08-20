@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<AnchorPane style="-fx-background-color: -fx-background" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.controller.MainController">
+    <children>
+        <VBox fx:id="vboxChildNode" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <children>
+                <HBox fx:id="hboxChildNode" spacing="5.0">
+                    <children>
+                        <GridPane fx:id="gpChildNode" hgap="5.0" vgap="5.0">
+                           <children>
+                              <Label alignment="CENTER" text="%ChildNode.Addr" />
+                              <TextField GridPane.columnIndex="1" />
+                              <Button text="%Add" GridPane.columnIndex="2" />
+                           </children>
+                     <columnConstraints>
+                        <ColumnConstraints />
+                        <ColumnConstraints />
+                        <ColumnConstraints />
+                     </columnConstraints>
+                     <rowConstraints>
+                        <RowConstraints />
+                     </rowConstraints>
+                        </GridPane>
+                    </children>
+                </HBox>
+                <AnchorPane fx:id="apChildNodeResult">
+                    <children>
+                        <TextArea fx:id="labChlidNodeResult" editable="false" prefHeight="100.0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0">
+                            <font>
+                                <Font name="System Bold" size="13.0" />
+                            </font>
+                        </TextArea>
+                    </children>
+                </AnchorPane>
+            </children>
+        </VBox>
+    </children>
+    <padding>
+        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+    </padding>
+</AnchorPane>

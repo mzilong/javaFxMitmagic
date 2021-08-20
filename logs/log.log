@@ -1,6 +1,14 @@
-2020-12-16 14:37:57  [ JavaFX Application Thread:0 ] - [ INFO ]  打开[WelcomeController]
-2020-12-16 14:37:59  [ JavaFX Application Thread:1278 ] - [ INFO ]  关闭[WelcomeController]
-2020-12-16 14:38:01  [ JavaFX Application Thread:4033 ] - [ INFO ]  打开[MainController]
-2020-12-16 14:38:39  [ JavaFX Application Thread:41230 ] - [ INFO ]  我是传过来的数据
-2020-12-16 14:38:39  [ JavaFX Application Thread:41427 ] - [ INFO ]  打开[SerialPortController]
-2020-12-16 14:38:54  [ JavaFX Application Thread:56435 ] - [ INFO ]  关闭[MainController]
+2021-08-20 10:02:13  [ JavaFX Application Thread:0 ] - [ INFO ]  打开[WelcomeController]
+2021-08-20 10:02:14  [ JavaFX Application Thread:1292 ] - [ INFO ]  关闭[WelcomeController]
+2021-08-20 10:02:17  [ JavaFX Application Thread:3882 ] - [ INFO ]  打开[MainController]
+2021-08-20 10:02:21  [ JavaFX Application Thread:7595 ] - [ INFO ]  关闭[MainController]
+2021-08-20 10:05:37  [ JavaFX Application Thread:0 ] - [ INFO ]  打开[WelcomeController]
+2021-08-20 10:05:38  [ JavaFX Application Thread:1370 ] - [ INFO ]  关闭[WelcomeController]
+2021-08-20 10:05:40  [ JavaFX Application Thread:3317 ] - [ INFO ]  打开[MainController]
+2021-08-20 10:06:07  [ JavaFX Application Thread:29823 ] - [ INFO ]  开始打开串口：portName=COM7,baudrate=9600,databits=8,stopbits=1,parity=2,flowcontrol=0
+2021-08-20 10:06:08  [ JavaFX Application Thread:30637 ] - [ INFO ]  打开串口 COM7 成功...
+2021-08-20 10:06:08  [ JavaFX Application Thread:31358 ] - [ INFO ]  往串口 COM7 发送数据：000c0074c0 完成...
+2021-08-20 10:06:12  [ JavaFX Application Thread:35097 ] - [ INFO ]  关闭串口 COM7
+2021-08-20 10:06:19  [ JavaFX Application Thread:42418 ] - [ INFO ]  我是传过来的数据
+2021-08-20 10:06:20  [ JavaFX Application Thread:42908 ] - [ INFO ]  打开[IconManagementController]
+2021-08-20 10:06:24  [ JavaFX Application Thread:46602 ] - [ INFO ]  关闭[MainController]

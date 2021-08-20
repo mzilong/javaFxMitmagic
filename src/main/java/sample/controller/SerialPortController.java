@@ -18,22 +18,24 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javafx.util.converter.FloatStringConverter;
 import javafx.util.converter.IntegerStringConverter;
-import sample.animation.AnimationType;
-import sample.animation.AnimationUtils;
+import org.apache.commons.lang3.StringUtils;
 import sample.controller.annotation.FxmlPath;
 import sample.controller.base.BaseController;
 import sample.event.BaseEvent;
 import sample.event.FxEventBus;
 import sample.locale.ControlResources;
+import sample.tools.CRC16M;
 import sample.utils.DataUtils;
 import sample.utils.SerialPortParameter;
 import sample.utils.SerialPortTool;
+import sample.utils.ThreadPoolUtils;
 import sample.utils.javafx.JFXUtils;
 
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.ResourceBundle;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 /**
  *
@@ -45,7 +47,29 @@ import java.util.ResourceBundle;
 @FxmlPath("fxml/serialport.fxml")
 public class SerialPortController extends BaseController {
 
+    public ComboBox<String> cbCheck;
+    public ComboBox<Integer> cbRequestTime;
+    public TextArea textAreaShow;
+
+    public ComboBox<String> cbPortName;
+    public ComboBox<Integer> cbBaudRate;
+    public ComboBox<Integer> cbDataBits;
+    public ComboBox<Float> cbStopBits;
+    public ComboBox<Integer> cbParity;
+    public ComboBox<String> cbFlowcontrol;
+    public Button btnConfigurePort;
+
+    public Button btnClearAll;
+    public Button btnSend;
+    public Button btnClear;
+    public Button btnCopy;
+    public Button btnPaste;
+    public Button btnSelectAll;
+    public TextArea textArea;
+
     private ObservableList<String> observableList ;
+    private String curCheck;
+    private int timeout = 3*1000;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -71,6 +95,18 @@ public class SerialPortController extends BaseController {
         }
     }
 
+    private void initPortName(boolean isSet){
+        ArrayList<String> aspList = SerialPortTool.getAvailableSerialPorts();
+        observableList = FXCollections.observableList(aspList);//转化为可观察的list，支持改变监听
+        if(aspList.size() > 0) {
+            cbPortName.setItems(observableList);
+            if (isSet){
+                serialPortParameter.setPortName(aspList.get(0));
+                cbPortName.setValue(serialPortParameter.getPortName());
+            }
+        }
+    }
+
     @Override
     public void onShowing(WindowEvent event) {
         super.onShowing(event);
@@ -82,13 +118,7 @@ public class SerialPortController extends BaseController {
 
         FxEventBus.getDefault().fireEvent(new BaseEvent("不同Controller之间的Event"));
 
-        ArrayList<String> aspList = SerialPortTool.getAvailableSerialPorts();
-        observableList = FXCollections.observableList(aspList);//转化为可观察的list，支持改变监听
-        if(aspList.size() > 0){
-            cbPortName.setItems(observableList);
-            serialPortParameter.setPortName(aspList.get(0));
-            cbPortName.setValue(serialPortParameter.getPortName());
-        }
+        initPortName(true);
         cbBaudRate.setEditable(true);
         cbBaudRate.getItems().addAll(SerialPortParameter.BAUDRATE_150,SerialPortParameter.BAUDRATE_300,SerialPortParameter.BAUDRATE_600
                 ,SerialPortParameter.BAUDRATE_1200,SerialPortParameter.BAUDRATE_2400,SerialPortParameter.BAUDRATE_4800
@@ -122,7 +152,14 @@ public class SerialPortController extends BaseController {
                 ,SerialPortParameter.FLOW_CONTROL_XONXOFF_IN_ENABLED,SerialPortParameter.FLOW_CONTROL_XONXOFF_OUT_ENABLED);
         cbFlowcontrol.setValue(serialPortParameter.getFlowcontrolStr());
 
-        AnimationUtils.createTransition(btnSend, AnimationType.BOUNCE);
+        cbPortName.setOnMouseClicked(mouseEvent -> {
+            initPortName(false);
+        });
+
+        cbRequestTime.getItems().addAll(1,2,3,6,10,15,20,60);
+        cbRequestTime.setValue(3);
+
+        cbCheck.getItems().addAll(SerialPortParameter.CRC_NONE,SerialPortParameter.CHECKSUM_8,SerialPortParameter.CRC_16_MODBUS);
 
         Stage primaryStage = getIntent().getPrimaryStage();
         //监听最大化
@@ -138,70 +175,53 @@ public class SerialPortController extends BaseController {
                 btnConfigurePort.fire();
             }
         });
-        observableMap.put(new KeyCodeCombination(KeyCode.ENTER, KeyCombination.SHORTCUT_DOWN), new Runnable() {
-            @Override
-            public void run() {
-                btnSend.fire();
-            }
-        });
     }
 
     private SerialPortParameter serialPortParameter;
     private SerialPort serialPort;
+    private boolean isReceive;
+    ScheduledThreadPoolExecutor stpExecutor;
 
-    @FXML
-    private TextArea textAreaShow;
-
-    @FXML
-    private ComboBox<String> cbPortName;
-    @FXML
-    private ComboBox<Integer> cbBaudRate;
-    @FXML
-    private ComboBox<Integer> cbDataBits;
-    @FXML
-    private ComboBox<Float> cbStopBits;
-    @FXML
-    private ComboBox<Integer> cbParity;
-    @FXML
-    private ComboBox<String> cbFlowcontrol;
-
-    @FXML
-    private Button btnConfigurePort;
-
-    @FXML
-    private Button btnSend;
-    @FXML
-    private Button btnClear;
-    @FXML
-    private Button btnCopy;
-    @FXML
-    private Button btnPaste;
-    @FXML
-    private Button btnSelectAll;
-
-    @FXML
-    private TextArea textArea;
-
+    private Runnable task= () -> {
+        isReceive = false;
+        setScrollToBottom(textAreaShow.getText() +ControlResources.getString("Receive")+"：" + ControlResources.getString("CommunicationTimeout") +"\n");
+    };
     private void sendData() {
         if(serialPort==null){
-            setScrollToBottom(textAreaShow.getText() + "请先打开串口！\n");
+            setScrollToBottom(textAreaShow.getText() +ControlResources.getString("OpenTheSerialPort.Tip") +"\n");
+            return;
+        }
+        if(isReceive){
             return;
         }
         //发送16进制数据——实际应用中串口通信传输的数据，大都是 16 进制
-        String hexStrCode = textArea.getText();
+        String hexStrCode = textArea.getText().replace("\n","");
         if(hexStrCode == null || hexStrCode.length() == 0){
-            setScrollToBottom(textAreaShow.getText() + "请输入发送内容！\n");
+            setScrollToBottom(textAreaShow.getText() + ControlResources.getString("SendContent.Tip") +"\n");
             return;
         }
+        isReceive = true;
         byte[] bytes = SerialPortTool.hexStringToBytes(hexStrCode);
+        textArea.setText(DataUtils.separatedByChr(DataUtils.bytesToHexString(bytes).toUpperCase(),2," "));
+        if(StringUtils.isNotBlank(curCheck)){
+            if(curCheck.equals(SerialPortParameter.CHECKSUM_8)){
+                bytes = CRC16M.checkSum(bytes,bytes.length);
+            }else if(curCheck.equals(SerialPortParameter.CRC_16_MODBUS)){
+                bytes = CRC16M.updateCheckCode(bytes,bytes.length);
+            }
+        }
         hexStrCode =  DataUtils.separatedByChr(Objects.requireNonNull(SerialPortTool.bytesToHexString(bytes)).toUpperCase(),2," ");
         SerialPortTool.sendData(serialPort, bytes);
-        textArea.setText(hexStrCode);
-        setScrollToBottom(textAreaShow.getText() + "发送："+ hexStrCode  + "\n");
+        setScrollToBottom(textAreaShow.getText() + ControlResources.getString("Send")+"："+ hexStrCode  + "\n");
+        stpExecutor = ThreadPoolUtils.runDelayTime(task,timeout);
     }
+
     @FXML
     public void onButtonClick(ActionEvent actionEvent) {
-        if(actionEvent.getTarget().equals(btnClear)){
+        if(actionEvent.getTarget().equals(btnClearAll)){
+            textAreaShow.clear();
+            textArea.clear();
+        }else if(actionEvent.getTarget().equals(btnClear)){
             textAreaShow.clear();
         }else if(actionEvent.getTarget().equals(btnCopy)){
             textAreaShow.copy();
@@ -234,15 +254,27 @@ public class SerialPortController extends BaseController {
             serialPortParameter.setParity(cbParity.getSelectionModel().getSelectedItem());
         }else  if(actionEvent.getTarget().equals(cbFlowcontrol)){
             serialPortParameter.setFlowcontrolStr(cbFlowcontrol.getSelectionModel().getSelectedItem());
+        }else  if(actionEvent.getTarget().equals(cbCheck)){
+            curCheck = cbCheck.getSelectionModel().getSelectedItem();
+        }else  if(actionEvent.getTarget().equals(cbRequestTime)){
+            String timeStr = cbRequestTime.getSelectionModel().getSelectedItem()+"";
+            if(StringUtils.isNotBlank(timeStr)){
+                timeout = Integer.parseInt(timeStr)*1000;
+            }else{
+                timeout = 3000;
+            }
         }
     }
-
+    private void closeSerialPort(){
+        stopData();
+        SerialPortTool.closeSerialPort(serialPort);
+        serialPort = null;
+        btnConfigurePort.setText(ControlResources.getString("ConfigureThePort"));
+        setScrollToBottom(textAreaShow.getText() + ControlResources.getString("CloseTheSerialPort")+"\n");
+    }
     private void configurePort() {
         if(serialPort!=null){
-            SerialPortTool.closeSerialPort(serialPort);
-            serialPort = null;
-            btnConfigurePort.setText("配置端口(ctrl+p)");
-            setScrollToBottom(textAreaShow.getText() + "关闭串口\n");
+            closeSerialPort();
             return;
         }
 
@@ -256,21 +288,29 @@ public class SerialPortController extends BaseController {
             @Override
             public void serialEvent(SerialPortEvent serialPortEvent) {
                 if (serialPortEvent.getEventType() == SerialPort.LISTENING_EVENT_DATA_AVAILABLE) {//有效数据
+//                    if(!isReceive){
+//                        return;
+//                    }
+                    isReceive = true;
                     byte[] copyValue = SerialPortTool.readData(serialPort);
-                    JFXUtils.runUiThread(() -> setScrollToBottom(textAreaShow.getText() + "接受：" + DataUtils.separatedByChr(Objects.requireNonNull(SerialPortTool.bytesToHexString(copyValue)).toUpperCase(), 2, " ") + "\n"));
+                    stopData();
+                    JFXUtils.runUiThread(() -> setScrollToBottom(textAreaShow.getText()+ControlResources.getString("Receive") + "：" + DataUtils.separatedByChr(Objects.requireNonNull(SerialPortTool.bytesToHexString(copyValue)).toUpperCase(), 2, " ") + "\n"));
                 }
             }
         });
         JFXUtils.runUiThread(() -> {
             if (serialPort != null) {
-                btnConfigurePort.setText("关闭端口(ctrl+p)");
-                setScrollToBottom(textAreaShow.getText() + "打开串口【" + serialPortParameter.getPortName() + "】成功\n");
+                btnConfigurePort.setText(ControlResources.getString("CloseThePort"));
+                setScrollToBottom(textAreaShow.getText() + ControlResources.getString("OpenSerialPort") +"【" + serialPortParameter.getPortName() + "】"+ControlResources.getString("Success") +"\n");
             } else {
-                setScrollToBottom(textAreaShow.getText() + "打开串口【" + serialPortParameter.getPortName() + "】失败\n");
+                setScrollToBottom(textAreaShow.getText() +ControlResources.getString("OpenSerialPort") + "【" + serialPortParameter.getPortName() + "】"+ControlResources.getString("Fail") +"\n");
             }
         });
     }
-
+    private void stopData() {
+        isReceive = false;
+        stpExecutor.shutdownNow();
+    }
     private void setScrollToBottom(String txt){
         textAreaShow.setText(txt);
         textAreaShow.setScrollTop(Double.MAX_VALUE);

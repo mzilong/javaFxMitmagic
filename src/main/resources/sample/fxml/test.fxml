@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import org.controlsfx.control.*?>
+<?import sample.view.*?>
+
+<BorderPane prefHeight="700.0" prefWidth="1400.0" stylesheets="@../css/style.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.controller.TestController">
+    <top>
+        <VBox>
+            <StackPane>
+                <children>
+                    <MenuBar>
+                        <menus>
+                            <Menu mnemonicParsing="false" text="文件">
+                                <items>
+                                    <MenuItem mnemonicParsing="false" text="%New" />
+                                    <Menu mnemonicParsing="false" text="导出/导入操作">
+                                        <items>
+                                            <MenuItem mnemonicParsing="false" text="导出" />
+                                            <MenuItem mnemonicParsing="false" text="导入" />
+                                        </items>
+                                    </Menu>
+                                    <MenuItem mnemonicParsing="false" text="打开" />
+                                    <RadioMenuItem mnemonicParsing="false" text="单选项" />
+                                    <SeparatorMenuItem mnemonicParsing="false" />
+                                    <MenuItem mnemonicParsing="false" onAction="#onExit" text="关闭" />
+                                </items>
+                            </Menu>
+                            <Menu mnemonicParsing="false" text="编辑">
+                                <items>
+                                    <MenuItem mnemonicParsing="false" text="删除" />
+                                    <CheckMenuItem mnemonicParsing="false" text="多选" />
+                                </items>
+                            </Menu>
+                            <Menu mnemonicParsing="false" text="工具">
+                                <items>
+                                    <MenuItem mnemonicParsing="false" onAction="#openSerialPort" text="串口调试" />
+                                </items>
+                            </Menu>
+                            <Menu mnemonicParsing="false" text="帮助">
+                                <items>
+                                    <Menu fx:id="fontMenu" mnemonicParsing="false" text="字体">
+                                        
+                                    </Menu>
+                                    <MenuItem mnemonicParsing="false" text="关于">
+                                        <graphic>
+                                            <ImageView fitHeight="16" fitWidth="16" nodeOrientation="RIGHT_TO_LEFT">
+                                                <image>
+                                                    <Image url="@../img/ic_launcher.png" />
+                                                </image>
+                                            </ImageView>
+                                        </graphic>
+                                    </MenuItem>
+                                </items>
+                            </Menu>
+                        </menus>
+                    </MenuBar>
+                    <ColorPicker fx:id="colorPicker" onAction="#selectBgColor" StackPane.alignment="CENTER_RIGHT" />
+                </children>
+            </StackPane>
+            <BreadCrumbBar fx:id="breadCrumbBar" VBox.vgrow="ALWAYS" />
+        </VBox>
+    </top>
+    <center>
+        <SplitPane dividerPositions="0.75" orientation="VERTICAL" BorderPane.alignment="CENTER" VBox.vgrow="ALWAYS">
+            <items>
+                <AnchorPane>
+                    <children>
+                        <SplitPane dividerPositions="0.2" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                            <items>
+                                <AnchorPane>
+                                    <children>
+                                        <TreeView fx:id="treeView" editable="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                            <root>
+                                                <TreeItem expanded="true" value="编程">
+                                                    <children>
+                                                        <TreeItem expanded="true" value="开发工具">
+                                                            <children>
+                                                                <TreeItem value="Eclipse" />
+                                                                <TreeItem value="InteliJ IDEA" />
+                                                                <TreeItem value="Android Studio" />
+                                                                <TreeItem value="PyCharm" />
+                                                                <TreeItem value="PhpStorm" />
+                                                                <TreeItem value="WebStorm" />
+                                                                <TreeItem value="Clion" />
+                                                            </children>
+                                                        </TreeItem>
+                                                        <TreeItem expanded="true" value="移动端">
+                                                            <children>
+                                                                <TreeItem value="android" />
+                                                                <TreeItem value="Kotlin" />
+                                                                <TreeItem value="swift" />
+                                                                <TreeItem value="object-c" />
+                                                                <TreeItem value="ionic" />
+                                                                <TreeItem value="apicloud" />
+                                                                <TreeItem value="dcloud" />
+                                                                <TreeItem value="jquery" />
+                                                            </children>
+                                                        </TreeItem>
+                                                        <TreeItem expanded="true" value="前端">
+                                                            <children>
+                                                                <TreeItem value="JavaScript" />
+                                                                <TreeItem value="html" />
+                                                                <TreeItem value="css" />
+                                                            </children>
+                                                        </TreeItem>
+                                                        <TreeItem expanded="true" value="服务端">
+                                                            <children>
+                                                                <TreeItem value="python" />
+                                                                <TreeItem value="linux" />
+                                                                <TreeItem value="jsp" />
+                                                                <TreeItem value="asp" />
+                                                                <TreeItem value="php" />
+                                                                <TreeItem value="ruby" />
+                                                                <TreeItem value="docker" />
+                                                                <TreeItem value="go" />
+                                                                <TreeItem value="java" />
+                                                                <TreeItem value="c" />
+                                                                <TreeItem value="c++" />
+                                                            </children>
+                                                        </TreeItem>
+                                                        <TreeItem expanded="true" value="数据库">
+                                                            <children>
+                                                                <TreeItem value="sql" />
+                                                                <TreeItem value="mysql" />
+                                                                <TreeItem value="sqlite" />
+                                                                <TreeItem value="oracle" />
+                                                                <TreeItem value="PostgreSQL" />
+                                                                <TreeItem value="MongoDB" />
+                                                            </children>
+                                                        </TreeItem>
+                                                    </children>
+                                                </TreeItem>
+                                            </root>
+                                        </TreeView>
+                                    </children>
+                                </AnchorPane>
+                                <SplitPane dividerPositions="1.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                    <AnchorPane>
+                                        <children>
+                                            <HBox layoutX="-49.599998474121094" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                <children>
+                                                    <Browser fx:id="broeser" prefWidth="227.0" HBox.hgrow="ALWAYS">
+
+                                                    </Browser>
+                                                </children>
+                                            </HBox>
+                                        </children>
+                                    </AnchorPane>
+                                    <AnchorPane>
+                                        <children>
+                                            <Pane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                <Accordion AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                    <panes>
+                                                        <TitledPane text="分组一">
+                                                            <content>
+                                                            </content>
+                                                        </TitledPane>
+                                                        <TitledPane text="分组二">
+                                                            <content>
+                                                            </content>
+                                                        </TitledPane>
+                                                        <TitledPane text="分组三">
+                                                            <content>
+                                                            </content>
+                                                        </TitledPane>
+                                                    </panes>
+                                                </Accordion>
+                                            </Pane>
+                                        </children>
+                                    </AnchorPane>
+                                </SplitPane>
+                            </items>
+                        </SplitPane>
+                    </children>
+                </AnchorPane>
+                <AnchorPane prefHeight="200.0">
+                    <children>
+                        <TabPane tabClosingPolicy="ALL_TABS" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                            <tabs>
+                                <Tab text="选卡一">
+                                    <content>
+                                        <AnchorPane fx:id="tAnchorPane">
+                                            <children>
+
+                                            </children>
+                                        </AnchorPane>
+                                    </content>
+                                </Tab>
+                                <Tab text="选卡二">
+                                    <content>
+                                        <AnchorPane fx:id="tAnchorPane2">
+                                            <children>
+                                            </children>
+                                        </AnchorPane>
+                                    </content>
+                                </Tab>
+                            </tabs>
+                        </TabPane>
+                    </children>
+                </AnchorPane>
+            </items>
+        </SplitPane>
+    </center>
+    <left>
+      <AnchorPane>
+         <children>
+            <TabPane prefWidth="30.0" side="LEFT" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+              <tabs>
+                <Tab text="项目">
+                  <content>
+                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                  </content>
+                </Tab>
+                <Tab text="其他">
+                  <content>
+                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                  </content>
+                </Tab>
+              </tabs>
+            </TabPane>
+         </children>
+      </AnchorPane>
+    </left>
+   <right>
+      <TabPane prefWidth="30.0" side="RIGHT" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
+        <tabs>
+          <Tab text="Maven">
+            <content>
+              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+            </content>
+          </Tab>
+          <Tab text="ant">
+            <content>
+              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+            </content>
+          </Tab>
+        </tabs>
+      </TabPane>
+   </right>
+   <bottom>
+      <VBox BorderPane.alignment="CENTER">
+         <children>
+             <MasterDetailPane fx:id="masterDetailPane" prefHeight="100.0">
+             </MasterDetailPane>
+            <TabPane prefHeight="100.0" side="BOTTOM" tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS">
+              <tabs>
+                <Tab text="Run">
+                  <content>
+                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                      </AnchorPane>
+                  </content>
+                </Tab>
+                <Tab text="Dubug">
+                  <content>
+                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                  </content>
+                </Tab>
+                <Tab text="终端">
+                  <content>
+                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                  </content>
+                </Tab>
+              </tabs>
+               <VBox.margin>
+                  <Insets />
+               </VBox.margin>
+            </TabPane>
+         </children></VBox>
+   </bottom>
+</BorderPane>

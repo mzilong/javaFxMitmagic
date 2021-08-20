@@ -127,12 +127,17 @@ public class FxIntent {
                 });
                 root = decorator;
             }
+            JFXUtils.setupIcon(primaryStage,JFXUtils.getImg("ic_launcher_512x512.png"));
             BaseController controller = loader.getController();
             controller.setIntent(this);
             Scene scene= new Scene(root,width,height, Color.TRANSPARENT);
             scene.getStylesheets().addAll(JFoenixResources.load("css/jfoenix-fonts.css").toExternalForm(),
                     JFoenixResources.load("css/jfoenix-design.css").toExternalForm(),
                     JFXResources.getResource("css/jfoenix-main.css").toExternalForm());
+            if (BaseController.ELEMENT_STYLE) {
+                scene.getStylesheets().add(JFXResources.getResource("css/element-ui.css").toExternalForm());
+            }
+            scene.getStylesheets().add(JFXResources.getResource("css/icon.css").toExternalForm());
             primaryStage.setScene(scene);
             primaryStage.show();
         } catch (Exception e) {
@@ -145,8 +150,8 @@ public class FxIntent {
     private Timeline timeline;
     /**
      * 用于显示放大预览的透明矩形窗口
-     * @param side
-     * @param mouseEvent
+     * @param side 方位枚举
+     * @param mouseEvent 鼠标事件
      */
     private void showRectangleStage(Side side, MouseEvent mouseEvent){
         if(side==null){
@@ -163,15 +168,12 @@ public class FxIntent {
                         ));
                 timeline.play();
                 ScheduledThreadPoolExecutor stpExecutor = new ScheduledThreadPoolExecutor(1);
-                stpExecutor.schedule(new Runnable() {
-                    @Override
-                    public void run() {
-                        timeline = null;
-                        Platform.runLater(() -> {
-                            rectangleStage.close();
-                            rectangleStage = null;
-                        });
-                    }
+                stpExecutor.schedule(() -> {
+                    timeline = null;
+                    Platform.runLater(() -> {
+                        rectangleStage.close();
+                        rectangleStage = null;
+                    });
                 },200, TimeUnit.MILLISECONDS);
             }
             return;
@@ -243,8 +245,8 @@ public class FxIntent {
     private Stage pointStage;
     /**
      * 用于显示放大预览的透明点
-     * @param side
-     * @param mouseEvent
+     * @param side 方位枚举
+     * @param mouseEvent 鼠标事件
      */
     private void showPointStage(Side side,MouseEvent mouseEvent){
         if(side==null){

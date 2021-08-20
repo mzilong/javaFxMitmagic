@@ -2,7 +2,7 @@ package sample.controller;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
-import javafx.scene.control.ProgressBar;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.text.Font;
 import javafx.stage.WindowEvent;
@@ -21,10 +21,11 @@ import java.util.ResourceBundle;
 public class WelcomeController extends BaseController{
 
     public Label lab;
-    public ProgressBar progressBar;
+    public ProgressIndicator progressIndicator;
 
     @Override
-    public void initialize(URL location, ResourceBundle resources) {}
+    public void initialize(URL location, ResourceBundle resources) {
+    }
 
     @Override
     public String initTitle() {
@@ -84,7 +85,7 @@ public class WelcomeController extends BaseController{
                 });
             }
         };
-        progressBar.progressProperty().bind(task.progressProperty());
+        progressIndicator.progressProperty().bind(task.progressProperty());
         ThreadPoolUtils.runDelayTime(task,1000);
     }
 

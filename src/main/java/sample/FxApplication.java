@@ -17,9 +17,8 @@ package sample;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
+import sample.controller.base.BaseController;
 import sample.enums.HighContrastTheme;
-
-import java.util.Locale;
 
 
 /**
@@ -34,12 +33,8 @@ public abstract class FxApplication extends Application implements IFxApplicatio
     public FxApplication() {
 	}
 
-	/**
-	 * Set the local default internationalized language
-	 * @param locale internationalized language
-	 */
-	public void setDefaultLocale(Locale locale){
-		Locale.setDefault(locale);
+	public static void setElementStyleEnable(boolean enable){
+		BaseController.ELEMENT_STYLE = enable;
 	}
 
 	/**

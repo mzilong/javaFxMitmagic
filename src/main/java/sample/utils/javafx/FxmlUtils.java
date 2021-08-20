@@ -77,16 +77,29 @@ public class FxmlUtils {
         return loadFxmlFromResource(resourcePath, null);
     }
 
+    public static FXMLLoader loadFxmlFromResource(String resourcePath, Object controller) {
+        return loadFxmlFromResource(resourcePath, null,controller);
+    }
+
     public static FXMLLoader loadFxmlFromResource(String resourcePath, ResourceBundle resourceBundle) {
         return loadFxmlFromResource(JFXResources.getResource(resourcePath),resourceBundle);
     }
 
+    public static FXMLLoader loadFxmlFromResource(String resourcePath, ResourceBundle resourceBundle, Object controller) {
+        return loadFxmlFromResource(JFXResources.getResource(resourcePath),resourceBundle,controller);
+    }
+
     public static FXMLLoader loadFxmlFromResource(URL resourceURL, ResourceBundle resourceBundle) {
+        return loadFxmlFromResource(resourceURL,resourceBundle,null);
+    }
+
+    public static FXMLLoader loadFxmlFromResource(URL resourceURL, ResourceBundle resourceBundle, Object controller) {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader();
             fxmlLoader.setBuilderFactory(new JavaFXBuilderFactory());
             fxmlLoader.setLocation(resourceURL);
             fxmlLoader.setResources(resourceBundle);
+            fxmlLoader.setController(controller);
             fxmlLoader.load();
             return fxmlLoader;
         } catch (IOException e) {

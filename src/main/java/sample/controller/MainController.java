@@ -1,63 +1,127 @@
 package sample.controller;
 
+import com.fazecast.jSerialComm.SerialPort;
+import com.fazecast.jSerialComm.SerialPortDataListener;
+import com.fazecast.jSerialComm.SerialPortEvent;
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
-import javafx.scene.control.ColorPicker;
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeView;
+import javafx.geometry.Insets;
+import javafx.scene.Node;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTreeCell;
-import javafx.scene.input.DataFormat;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
+import javafx.util.StringConverter;
+import javafx.util.converter.FloatStringConverter;
+import javafx.util.converter.IntegerStringConverter;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.controlsfx.control.BreadCrumbBar;
-import sample.JFXResources;
+import sample.animation.AnimationType;
+import sample.animation.AnimationUtils;
 import sample.controller.annotation.FxmlPath;
 import sample.controller.base.BaseController;
 import sample.event.BaseEvent;
 import sample.locale.ControlResources;
+import sample.model.BaseItem;
+import sample.model.FontItem;
+import sample.tools.CRC16M;
+import sample.tools.PreferencesTools;
 import sample.tools.dialog.DialogBuilder;
-import sample.utils.ClipboardUtils;
-import sample.utils.ReflectUtils;
+import sample.tools.dialog.Message;
+import sample.utils.*;
+import sample.utils.javafx.Borders;
 import sample.utils.javafx.FxIntent;
 import sample.utils.javafx.FxStyleUtils;
 import sample.utils.javafx.JFXUtils;
-import sample.view.Browser;
+import sample.view.Icon;
 
+import java.io.IOException;
 import java.net.URL;
-import java.util.ResourceBundle;
+import java.util.*;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 /**
- *
  * @author: mzl
- * Description:ChildController
+ * Description:MainController
  * Data: 2020/8/18 16:29
  */
 
 @FxmlPath("fxml")
 public class MainController extends BaseController {
 
-    public AnchorPane tAnchorPane,tAnchorPane2;
-    public Browser broeser;
     public ColorPicker colorPicker;
-    public BreadCrumbBar breadCrumbBar;
-    public TreeView<String> treeView;
+    public BreadCrumbBar<String> breadCrumbBar;
+    public TreeView<BaseItem<Byte>> treeView;
+    public ComboBox<FontItem> cbFont;
+    public ComboBox<BaseItem<Locale>> cbLanguage;
+
+    public StackPane container;
+    public AnchorPane parentContainer, parentResult,
+            parentParentNode, parentNodeManagement, parentChildNode;
+
+    public ComboBox<String> cbPortName;
+    public ComboBox<Integer> cbBaudRate;
+    public ComboBox<Integer> cbDataBits;
+    public ComboBox<Float> cbStopBits;
+    public ComboBox<Integer> cbParity;
+    public ComboBox<String> cbFlowcontrol;
+    public ComboBox<Integer> cbRequestTime;
+
+    public TextArea textArea,textAreaShow;
+    public Button btnSend;
+    public Button btnClear;
+    public Button btnCopy;
+    public Button btnPaste;
+    public Button btnSelectAll;
+    public Button btnClearAll;
+
+    public Button btnConfigurePort;
+    public Button btnStart;
+    public Button btnStop;
+    public Button btnOpenSerialPort;
+    public Button btnOpenCalculator;
+    public Button btnOpenIcon;
+    public TextField tfDestinationAddress;
+    public TextField tfSourceAddress;
+    public TextField tfParentNode;
+    public TextArea labResult;
+    public TextArea labParentNodeResult;
+    public TextArea labNodeResult;
+    public TextArea labChlidNodeResult;
+    public TextField tfStartNum,tfPageNum;
+    public GridPane gpChildNode;
+    public VBox vboxMain;
+
+
+    private SerialPortParameter serialPortParameter;
+    private SerialPort serialPort;
+
+    private int timeout = 3000;
+    private BaseItem<Byte> curBaseItem;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        serialPortParameter = new SerialPortParameter("");
         //这里一定要有判断，不然会有空指针异常
-        String title = ReflectUtils.reflect(this).method("initTitle").get();
+//        String title = ReflectUtils.reflect(this).method("initTitle").get();
     }
 
     @Override
-    public String initTitle(){
+    public String initTitle() {
         return ControlResources.getString("Title");
     }
 
@@ -68,85 +132,935 @@ public class MainController extends BaseController {
 
     private void onCloseRequest(Event event) {
         event.consume();
-        String color = getFxBasePref();
+        String color = PreferencesTools.getFxBasePref();
         new DialogBuilder(getIntent().getPrimaryStage()).setTitle(ControlResources.getString("Dialog.Tips"))
                 .setMessage(ControlResources.getString("Dialog.Message"))
                 .setPositiveBtn(ControlResources.getString("Dialog.Yes"), () -> {
                     JFXUtils.runUiThread(() -> getIntent().closePrimaryStage());
                     Platform.exit();
-                }, "").setNegativeBtn(ControlResources.getString("Dialog.Cancel"), "").addListener(pane -> {
-                    FxStyleUtils.setBase(pane,JFXUtils.colorToWebColor(Color.valueOf(color).brighter()));
-                }).create();
+                }, "").setNegativeBtn(ControlResources.getString("Dialog.Cancel"), "").addListener(pane ->
+            FxStyleUtils.setBase(pane, JFXUtils.colorToWebColor(Color.valueOf(color).brighter()))
+        ).create();
     }
 
     @Override
     public void onEvent(BaseEvent event) {
         Object obj = event.getData();
-        System.out.println("BaseEvent.MainController:"+obj);
+        System.out.println("BaseEvent.MainController:" + obj);
     }
 
     @Override
     public void onShowing(WindowEvent event) {
         super.onShowing(event);
+        initContainer();
+        initSerialPortParameter();
         Stage primaryStage = getIntent().getPrimaryStage();
-        primaryStage.setOnCloseRequest(windowEvent -> onCloseRequest(windowEvent));
+        primaryStage.setOnCloseRequest(this::onCloseRequest);
         //监听最大化
-        primaryStage.maximizedProperty().addListener((observable, oldValue, newValue) -> {});
+        primaryStage.maximizedProperty().addListener((observable, oldValue, newValue) -> {
+        });
 
         //添加系统托盘
-        JFXUtils.addSystemTray(initTitle(), "ic_launcher_16x16.png",primaryStage);
+        JFXUtils.addSystemTray(initTitle(), "ic_launcher_16x16.png", primaryStage);
 
         //给Scene添加快捷键
-        ObservableMap<KeyCombination, Runnable> observableMap= getIntent().getPrimaryStage().getScene().getAccelerators();
-        observableMap.put(new KeyCodeCombination(KeyCode.V, KeyCombination.SHORTCUT_DOWN), new Runnable() {
-            @Override
-            public void run() {
-                ClipboardUtils.addClipboardContent(tAnchorPane);
-            }
-        });
-        observableMap.put(new KeyCodeCombination(KeyCode.C, KeyCombination.SHORTCUT_DOWN), new Runnable() {
-            @Override
-            public void run() {
-                ClipboardUtils.setClipboardContent(DataFormat.IMAGE,JFXUtils.getImg("ic_launcher.png"));
-            }
-        });
+        ObservableMap<KeyCombination, Runnable> observableMap = getIntent().getPrimaryStage().getScene().getAccelerators();
+        observableMap.put(new KeyCodeCombination(KeyCode.P, KeyCombination.SHORTCUT_DOWN), () -> btnConfigurePort.fire());
 
-        ClipboardUtils.setDragDroppedPane(tAnchorPane);
-        ClipboardUtils.setDragDetectedNode(broeser);
-
-        broeser.load(JFXResources.getResource("webview/index.html").toExternalForm());
-//        broeser.load("http://47.106.241.58:8013/");
-
-        colorPicker.setValue(Color.valueOf(getFxBasePref()));
-        FxStyleUtils.setColorLabelVisible(colorPicker,false);
+        //主题颜色设置
+        colorPicker.setValue(Color.valueOf(PreferencesTools.getFxBasePref()));
+        FxStyleUtils.setColorLabelVisible(colorPicker, false);
         colorPicker.getCustomColors().addAll(
                 Color.web("#0091ea"),
                 Color.web("#3C3F41")
         );
-        TreeItem<String> model = BreadCrumbBar.buildTreeModel("Hello", "World", "This", "is", "cool");
+
+        //导航条
+        TreeItem<String> model = BreadCrumbBar.buildTreeModel(ControlResources.getString("Function"));
         breadCrumbBar.setSelectedCrumb(model);
         breadCrumbBar.setAutoNavigationEnabled(false);
-//        JFXUtils.setBackground(breadCrumbBar,colorPicker.getValue());
-        treeView.setEditable(true);
-        treeView.setCellFactory(TextFieldTreeCell.forTreeView());
-        treeView.setOnMouseClicked(mouseEvent -> {
-            if(mouseEvent.getClickCount() == 2){
-                TreeItem<String> item = treeView.getSelectionModel().getSelectedItem();
-                System.out.println("Selected Text : " + item.getValue());
+        vboxMain.getChildren().remove(breadCrumbBar);
+        //左侧功能
+        TreeItem<BaseItem<Byte>> rootTreeItem = new TreeItem<>(new BaseItem<>(0,ControlResources.getString("Function"), (byte)0x00),new Icon("el-icon-s-grid"));
+        TreeItem<BaseItem<Byte>> nodeTreeItem = new TreeItem<>(new BaseItem<>(-1,ControlResources.getString("ChildNodeManagement"), (byte)0x0F),new Icon("el-icon-edit-outline"));
+        rootTreeItem.getChildren().addAll(
+                new TreeItem<>(new BaseItem<>(1,ControlResources.getString("Current"), (byte)0x01)),
+                new TreeItem<>(new BaseItem<>(2,ControlResources.getString("Voltage"), (byte)0x02)),
+                new TreeItem<>(new BaseItem<>(3,ControlResources.getString("LeakageCurrent"), (byte)0x03)),
+                new TreeItem<>(new BaseItem<>(4,ControlResources.getString("WetTemperature"), (byte)0x04)),
+                new TreeItem<>(new BaseItem<>(5,ControlResources.getString("ReadTheStationTopology"), (byte)0x05)),
+                new TreeItem<>(new BaseItem<>(6,ControlResources.getString("ResetTheMeteringModule"), (byte)0x06)),
+                new TreeItem<>(new BaseItem<>(7,ControlResources.getString("SendingStationAreaTopology"), (byte)0x07)),
+                new TreeItem<>(new BaseItem<>(8,ControlResources.getString("ActivePower"), (byte)0x08)),
+                new TreeItem<>(new BaseItem<>(9,ControlResources.getString("ReactivePower"), (byte)0x09)),
+                new TreeItem<>(new BaseItem<>(10,ControlResources.getString("InspectingPower"), (byte)0x0A)),
+                new TreeItem<>(new BaseItem<>(11,ControlResources.getString("PowerFactor"), (byte)0x0B)),
+                new TreeItem<>(new BaseItem<>(12,ControlResources.getString("DeviceInformation"), (byte)0x0C)),
+                new TreeItem<>(new BaseItem<>(13,ControlResources.getString("ParentNode"), (byte)0x0D)),
+                new TreeItem<>(new BaseItem<>(14,ControlResources.getString("CableTemperature"), (byte)0x0E)),
+                nodeTreeItem
+
+        );
+        nodeTreeItem.getChildren().addAll(
+                new TreeItem<>(new BaseItem<>(15,ControlResources.getString("ChildNodeQuery"), (byte)0x0F),new Icon("el-icon-search")),
+                new TreeItem<>(new BaseItem<>(16,ControlResources.getString("ChildNodeAdd"), (byte)0x10),new Icon("el-icon-plus")),
+                new TreeItem<>(new BaseItem<>(17,ControlResources.getString("ChildNodeDelete"), (byte)0x11),new Icon("el-icon-delete"))
+        );
+
+        rootTreeItem.setExpanded(true);
+        nodeTreeItem.setExpanded(true);
+        treeView.setEditable(false);
+        treeView.setRoot(rootTreeItem);
+        treeView.setCellFactory(TextFieldTreeCell.forTreeView(new StringConverter<>() {
+            @Override
+            public String toString(BaseItem<Byte> integerBaseItem) {
+                return integerBaseItem.name;
             }
+
+            @Override
+            public BaseItem<Byte> fromString(String s) {
+                return null;
+            }
+        }));
+        curBaseItem = treeView.getTreeItem(0).getValue();
+        treeView.setOnMouseClicked(mouseEvent -> {
+            if(isReceive){
+                return;
+            }
+            TreeItem<BaseItem<Byte>> item = treeView.getSelectionModel().getSelectedItem();
+            if(item==null) {
+                return;
+            }
+            int level = treeView.getTreeItemLevel(item);
+            BaseItem<Byte> baseItem = item.getValue();
+            if(baseItem.id==-1){
+                return;
+            }
+            //设置导航条
+            List<String> str = new ArrayList<>();
+            str.add(baseItem.name);
+            for (int i = 0; i < level; i++) {
+                item = item.getParent();
+                str.add(item.getValue().name);
+            }
+            Collections.reverse(str);
+            TreeItem<String> model1 =  BreadCrumbBar.buildTreeModel((String[])str.toArray());
+            breadCrumbBar.setSelectedCrumb(model1);
+            if (baseItem.id==0) {
+                parentContainer.toFront();
+            } else if (baseItem.id==13) {
+                parentParentNode.toFront();
+                labParentNodeResult.setText("");
+            } else if (baseItem.id==15) {
+                parentNodeManagement.toFront();
+                labNodeResult.setText("");
+            } else if (baseItem.id==16||baseItem.id==17) {
+                parentChildNode.toFront();
+                labChlidNodeResult.setText("");
+            } else {
+                parentResult.toFront();
+                labResult.setText("");
+            }
+            curBaseItem = baseItem;
+        });
+
+        //字体设置
+        List<FontItem> list = new ArrayList<>();
+        list.add(new FontItem("System Default", null, 0));
+        list.add(new FontItem("Mac (13px)", "Lucida Grande", 13));
+        list.add(new FontItem("Windows 100% (12px)", "Segoe UI", 12));
+        list.add(new FontItem("Windows 125% (15px)", "Segoe UI", 15));
+        list.add(new FontItem("Windows 150% (18px)", "Segoe UI", 18));
+        list.add(new FontItem("Embedded Touch (22px)", "Arial", 22));
+        list.add(new FontItem("Linux (13px)", "Lucida Sans", 13));
+        list.add(new FontItem("Embedded Small (9px)", "Arial", 9));
+        cbFont.getItems().addAll(list);
+        cbFont.setConverter(new StringConverter<>() {
+            @Override
+            public String toString(FontItem fontItem) {
+                return fontItem.name;
+            }
+
+            @Override
+            public FontItem fromString(String s) {
+                return null;
+            }
+        });
+        cbFont.setValue(list.get(0));
+
+        //字体设置
+        cbLanguage.getItems().addAll(PreferencesTools.LANGUAGES);
+        cbLanguage.setConverter(new StringConverter<>() {
+            @Override
+            public String toString(BaseItem<Locale> baseItem) {
+                return baseItem.name;
+            }
+
+            @Override
+            public BaseItem<Locale> fromString(String s) {
+                return null;
+            }
+        });
+
+        for (BaseItem<Locale> b: PreferencesTools.LANGUAGES) {
+            if(b.value.getLanguage().equals(PreferencesTools.getLanguage())){
+                cbLanguage.setValue(b);
+                break;
+            }
+        }
+        addTextLimiter(tfSourceAddress,0,12);
+        addTextLimiter(tfDestinationAddress,0,12);
+        addTextLimiter(tfParentNode,0,12);
+        addTextLimiter(tfStartNum,1,2);
+        addTextLimiter(tfPageNum,1,2);
+    }
+
+    public void addTextLimiter(final TextField tf, int charsType, final int maxLength){
+        String chars = "0123456789ABCDEF";
+        if(charsType == 1){
+            chars = "0123456789";
+        }
+        final String finalChars = chars;
+        tf.textProperty().addListener((ov, oldValue, newValue) -> {
+            if(newValue!=null){
+                boolean isExist = true;
+                for (String str: newValue.split("")) {
+                    if(!finalChars.contains(str.toUpperCase())){
+                        isExist = false;
+                        break;
+                    }
+                }
+                if(!isExist){
+                    tf.setText(oldValue);
+                }
+
+                if (tf.getText().length() > maxLength) {
+                    String s = tf.getText().substring(0, maxLength);
+                    tf.setText(s);
+                }
+            }
+
         });
     }
 
-    public void openSerialPort(ActionEvent actionEvent) {
+    private void initContainer(){
+        parentContainer = JFXUtils.getParent("fxml/fun/container.fxml");
+        parentResult = JFXUtils.getParent("fxml/fun/result.fxml");
+        parentParentNode = JFXUtils.getParent("fxml/fun/parent_node.fxml");
+        parentNodeManagement = JFXUtils.getParent("fxml/fun/child_node_management.fxml");
+        parentChildNode = JFXUtils.getParent("fxml/fun/child_node.fxml");
+
+        container.getChildren().addAll(parentResult,parentParentNode,parentNodeManagement, parentChildNode,parentContainer);
+
+        btnSend = findView(parentContainer,"#btnSend");
+        btnSend.setOnAction(this::onButtonClick);
+        textArea = findView(parentContainer,"#textArea");
+        textAreaShow = findView(parentContainer,"#textAreaShow");
+        labResult = findView(parentResult,"#labResult");
+        ((VBox) findView(parentResult,"#vboxResult")).getChildren().addAll(
+                setNodeTitleBorder(findView(parentResult,"#apResult"),ControlResources.getString("ReceiveData")));
+
+        tfParentNode = findView(parentParentNode,"#tfParentNode");
+        labParentNodeResult = findView(parentParentNode,"#labParentNodeResult");
+        ((VBox) findView(parentParentNode,"#vboxParentNode")).getChildren().addAll(
+                setNodeTitleBorder(findView(parentParentNode,"#hboxParentNode"),ControlResources.getString("DataField")),
+                setNodeTitleBorder(findView(parentParentNode,"#apParentNodeResult"),ControlResources.getString("ReceiveData")));
+
+        tfStartNum = findView(parentNodeManagement,"#tfStartNum");
+        tfPageNum = findView(parentNodeManagement,"#tfPageNum");
+        labNodeResult = findView(parentNodeManagement,"#labNodeResult");
+        ((VBox) findView(parentNodeManagement,"#vboxNode")).getChildren().addAll(
+                setNodeTitleBorder(findView(parentNodeManagement,"#apNode"),ControlResources.getString("DataField")),
+                setNodeTitleBorder(findView(parentNodeManagement,"#apNodeResult"),ControlResources.getString("ReceiveData")));
+
+        gpChildNode = findView(parentChildNode,"#gpChildNode");
+        gpChildNode.getChildren().clear();
+        addNode();
+
+        labChlidNodeResult = findView(parentChildNode,"#labChlidNodeResult");
+        ((VBox) findView(parentChildNode,"#vboxChildNode")).getChildren().addAll(
+                setNodeTitleBorder(findView(parentChildNode,"#hboxChildNode"),ControlResources.getString("DataField")),
+                setNodeTitleBorder(findView(parentChildNode,"#apChildNodeResult"),ControlResources.getString("ReceiveData")));
+    }
+
+    private void addNode(){
+        int rowCount = gpChildNode.getChildren().size()/3;
+        if(rowCount>=16){
+            return;
+        }
+        Label label=new Label(ControlResources.getString("ChildNode.Addr")+rowCount);
+        label.setGraphic(new Icon("el-icon-s-help"));
+        label.setId("labChildNode"+rowCount);
+        TextField textField = new TextField();
+        textField.setId("tfChildNode"+rowCount);
+        String btnStr = rowCount==0?ControlResources.getString("Add"):ControlResources.getString("Delete");
+        Button button = new Button(btnStr);
+        button.setId("btnChildNode"+rowCount);
+        GridPane.setMargin(button, new Insets(0.0D, 10.0D, 0.0D, 0.0D));
+        button.setOnAction(event -> {
+            Button target = (Button) event.getTarget();
+            if(target.getText().equals(ControlResources.getString("Add"))){
+                addNode();
+            }else{
+                gpChildNode.getChildren().removeAll(
+                    target,
+                        label,
+                        textField
+                );
+            }
+        });
+        GridPane.setConstraints(label, rowCount>=8?3:0,rowCount%8);
+        GridPane.setConstraints(textField, rowCount>=8?4:1,rowCount%8);
+        GridPane.setConstraints(button, rowCount>=8?5:2,rowCount%8);
+        gpChildNode.getChildren().addAll(label,textField,button);
+        addTextLimiter(textField,0,12);
+    }
+
+    private Node setNodeTitleBorder(Node node,String title){
+        return Borders.wrap(node)
+                .lineBorder()
+                .title(title)
+                .color(Color.valueOf(PreferencesTools.getFxBasePref()))
+                .thickness(1)
+                .radius(5)
+                .build()
+                .build();
+    }
+
+    private void initPortName(boolean isSet){
+        ArrayList<String> aspList = SerialPortTool.getAvailableSerialPorts();
+        ObservableList<String> observableList = FXCollections.observableList(aspList);//转化为可观察的list，支持改变监听
+        if(aspList.size() > 0) {
+            cbPortName.setItems(observableList);
+            if (isSet){
+                serialPortParameter.setPortName(aspList.get(0));
+                cbPortName.setValue(serialPortParameter.getPortName());
+            }
+        }
+    }
+    private void initSerialPortParameter(){
+        initPortName(true);
+        cbBaudRate.setEditable(true);
+        cbBaudRate.getItems().addAll(SerialPortParameter.BAUDRATE_150,SerialPortParameter.BAUDRATE_300,SerialPortParameter.BAUDRATE_600
+                ,SerialPortParameter.BAUDRATE_1200,SerialPortParameter.BAUDRATE_2400,SerialPortParameter.BAUDRATE_4800
+                ,SerialPortParameter.BAUDRATE_9600,SerialPortParameter.BAUDRATE_19200,SerialPortParameter.BAUDRATE_38400,SerialPortParameter.BAUDRATE_57600
+                ,SerialPortParameter.BAUDRATE_128000,SerialPortParameter.BAUDRATE_115200,SerialPortParameter.BAUDRATE_256000);
+        cbBaudRate.setValue(serialPortParameter.getBaudRate());
+        cbDataBits.getItems().addAll(SerialPortParameter.DATABITS_5,SerialPortParameter.DATABITS_6,SerialPortParameter.DATABITS_7,SerialPortParameter.DATABITS_8);
+        cbDataBits.setValue(serialPortParameter.getDataBits());
+        cbStopBits.getItems().addAll(SerialPortParameter.ONE_STOP_BIT,SerialPortParameter.ONE_POINT_FIVE_STOP_BITS,SerialPortParameter.TWO_STOP_BITS);
+        cbStopBits.setValue((float) serialPortParameter.getStopBits());
+        cbStopBits.setConverter(new FloatStringConverter(){
+            @Override
+            public String toString(Float f) {
+                String stopBits = f+"";
+                if(f!= SerialPortParameter.ONE_POINT_FIVE_STOP_BITS){
+                    stopBits  = f.intValue()+"";
+                }
+                return stopBits;
+            }
+        });
+        cbParity.getItems().addAll(SerialPort.NO_PARITY,SerialPort.ODD_PARITY,SerialPort.EVEN_PARITY,SerialPort.MARK_PARITY,SerialPort.SPACE_PARITY);
+        cbParity.setConverter(new IntegerStringConverter() {
+            @Override
+            public String toString(Integer object) {
+                return serialPortParameter.getParityStr(object);
+            }
+        });
+        cbParity.setValue(serialPortParameter.getParity());
+        cbFlowcontrol.getItems().addAll(SerialPortParameter.FLOW_CONTROL_DISABLED,SerialPortParameter.FLOW_CONTROL_DSR_ENABLED
+                ,SerialPortParameter.FLOW_CONTROL_CTS_ENABLED,SerialPortParameter.FLOW_CONTROL_DTR_ENABLED,SerialPortParameter.FLOW_CONTROL_RTS_ENABLED
+                ,SerialPortParameter.FLOW_CONTROL_XONXOFF_IN_ENABLED,SerialPortParameter.FLOW_CONTROL_XONXOFF_OUT_ENABLED);
+        cbFlowcontrol.setValue(serialPortParameter.getFlowcontrolStr());
+
+        cbRequestTime.getItems().addAll(1,2,3,6,10,15,20,60);
+        cbRequestTime.setValue(3);
+
+        cbPortName.setOnMouseClicked(mouseEvent -> initPortName(false));
+    }
+
+    public void openSerialPort() {
         FxIntent intent = new FxIntent(SerialPortController.class, StageStyle.UTILITY);
         intent.addData("data", "我是传过来的数据");
         intent.start();
     }
+    public void openCalculator() {
+        try {
+            Runtime.getRuntime().exec("cmd /c start C:\\WINDOWS\\system32\\calc.exe");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-    public void selectBgColor(ActionEvent actionEvent) {
+    public void openIconManagement() {
+        FxIntent intent = new FxIntent(IconManagementController.class, StageStyle.UTILITY);
+        intent.addData("data", "我是传过来的数据");
+        intent.start();
+    }
+
+    public void  selectLocale(Locale locale){
+        PreferencesTools.setLanguage(locale);
+        JFXUtils.runUiThread(() -> getIntent().closePrimaryStage());
+        FxIntent intent = new FxIntent(MainController.class);
+        intent.start();
+
+    }
+
+    public void selectBgColor() {
         String color = JFXUtils.colorToWebColor(colorPicker.getValue());
-        setFxBasePref(color);
-        FxStyleUtils.setBase(getIntent().getRoot(),color);
-//        JFXUtils.setBackground(breadCrumbBar,colorPicker.getValue());
+        PreferencesTools.setFxBasePref(color);
+        FxStyleUtils.setBase(getIntent().getRoot(), color);
+    }
+
+    public void onChange(ActionEvent actionEvent) {
+        if (actionEvent.getTarget().equals(cbLanguage)) {
+            BaseItem<Locale> fontItem = cbLanguage.getSelectionModel().getSelectedItem();
+            selectLocale(fontItem.value);
+        } else if (actionEvent.getTarget().equals(cbFont)) {
+            FontItem fontItem = cbFont.getSelectionModel().getSelectedItem();
+            if (fontItem.fontSize != 0) {
+                FxStyleUtils.setFont(getIntent().getRoot(), fontItem.fontSize + "px \"" + fontItem.fontName + "\"");
+            } else {
+                FxStyleUtils.removeFont(getIntent().getRoot());
+            }
+        } else if(actionEvent.getTarget().equals(cbPortName)){
+            serialPortParameter.setPortName(cbPortName.getSelectionModel().getSelectedItem());
+        }else  if(actionEvent.getTarget().equals(cbBaudRate)){
+            serialPortParameter.setBaudRate(Integer.parseInt(cbBaudRate.getSelectionModel().getSelectedItem()+""));
+        }else  if(actionEvent.getTarget().equals(cbDataBits)){
+            serialPortParameter.setDataBits(cbDataBits.getSelectionModel().getSelectedItem());
+        }else  if(actionEvent.getTarget().equals(cbStopBits)){
+            float stopBits =cbStopBits.getSelectionModel().getSelectedItem();
+            if(stopBits== SerialPortParameter.ONE_POINT_FIVE_STOP_BITS){
+                stopBits  = SerialPort.TWO_STOP_BITS;
+            }
+            serialPortParameter.setStopBits((int) stopBits);
+        }else  if(actionEvent.getTarget().equals(cbParity)){
+            serialPortParameter.setParity(cbParity.getSelectionModel().getSelectedItem());
+        }else  if(actionEvent.getTarget().equals(cbFlowcontrol)){
+            serialPortParameter.setFlowcontrolStr(cbFlowcontrol.getSelectionModel().getSelectedItem());
+        }else  if(actionEvent.getTarget().equals(cbRequestTime)){
+            String timeStr = cbRequestTime.getSelectionModel().getSelectedItem()+"";
+            if(StringUtils.isNotBlank(timeStr)){
+                timeout = Integer.parseInt(timeStr)*1000;
+            }else{
+                timeout = 3000;
+            }
+        }
+    }
+
+    public void onButtonClick(ActionEvent actionEvent) {
+        if(actionEvent.getTarget().equals(btnClearAll)){
+            textAreaShow.clear();
+            textArea.clear();
+        }else if(actionEvent.getTarget().equals(btnClear)){
+            textAreaShow.clear();
+        }else if(actionEvent.getTarget().equals(btnCopy)){
+            textAreaShow.copy();
+        }else if(actionEvent.getTarget().equals(btnPaste)){
+            textAreaShow.paste();
+        }else if(actionEvent.getTarget().equals(btnSelectAll)){
+            textAreaShow.selectAll();
+        }else if(actionEvent.getTarget().equals(btnConfigurePort)){
+            configurePort();
+        }else if(actionEvent.getTarget().equals(btnStart)||actionEvent.getTarget().equals(btnSend)){
+            sendData();
+        }else if(actionEvent.getTarget().equals(btnStop)){
+            stopData();
+        }else if(actionEvent.getTarget().equals(btnOpenSerialPort)){
+            closeSerialPort();
+            openSerialPort();
+        }else if(actionEvent.getTarget().equals(btnOpenCalculator)){
+            openCalculator();
+        }else if(actionEvent.getTarget().equals(btnOpenIcon)){
+            openIconManagement();
+        }
+    }
+    private void closeSerialPort(){
+        stopData();
+        SerialPortTool.closeSerialPort(serialPort);
+        serialPort = null;
+        btnConfigurePort.setText(ControlResources.getString("ConfigureThePort"));
+        setScrollToBottom(textAreaShow.getText() + ControlResources.getString("CloseTheSerialPort")+"\n");
+    }
+    long lastTime = 0;
+    byte[] recvBytesType;
+    private void configurePort() {
+        if(serialPort!=null){
+            closeSerialPort();
+            return;
+        }
+        serialPort = SerialPortTool.openSerialPort(serialPortParameter.getPortName(), serialPortParameter.getBaudRate(), serialPortParameter.getDataBits(), serialPortParameter.getStopBits(), serialPortParameter.getParity(),serialPortParameter.getFlowcontrol());
+        SerialPortTool.setListenerToSerialPort(serialPort, new SerialPortDataListener() {
+            @Override
+            public int getListeningEvents() {
+                return SerialPort.LISTENING_EVENT_DATA_AVAILABLE;
+            }
+
+            @Override
+            public void serialEvent(SerialPortEvent serialPortEvent) {
+                if (serialPortEvent.getEventType() == SerialPort.LISTENING_EVENT_DATA_AVAILABLE) {//有效数据
+                    byte[] recvBytes = SerialPortTool.readData(serialPort);
+                    if(!isReceive){
+                        return;
+                    }
+
+                    if(System.nanoTime()-lastTime<= 200_000_000){
+                        System.out.println(System.nanoTime()+","+lastTime+","+(System.nanoTime()-lastTime));
+                        byte[] recvBytesNew = new byte[recvBytes.length+recvBytesType.length];
+                        System.arraycopy(recvBytesType,0,recvBytesNew,0,recvBytesType.length);
+                        System.arraycopy(recvBytes,0,recvBytesNew,recvBytesType.length,recvBytes.length);
+                        recvBytes = recvBytesNew;
+                    }
+                    recvBytesType = recvBytes;
+                    lastTime = System.nanoTime();
+                    String recMsg = getRecvMsg(recvBytes);
+                    if(recMsg.length()>0) {
+                        if(ControlResources.getString("Success").equals(recMsg)&&curBaseItem.id==5){
+                            isReceive = true;
+                        }else{
+                            stopData();
+                            byte[] finalRecvBytes = recvBytes;
+                            JFXUtils.runUiThread(() ->{
+                                if(curBaseItem.id==13){
+                                    labParentNodeResult.setText(recMsg);
+                                }else if(curBaseItem.id==15){
+                                    labNodeResult.setText(recMsg);
+                                } else if (curBaseItem.id==16||curBaseItem.id==17) {
+                                    labChlidNodeResult.setText(recMsg);
+                                } else{
+                                    labResult.setText(recMsg);
+                                }
+                                setScrollToBottom(textAreaShow.getText() +ControlResources.getString("Receive")+ "：" +
+                                        DataUtils.separatedByChr(Objects.requireNonNull(SerialPortTool.bytesToHexString(finalRecvBytes)).toUpperCase(), 2, " ") + "\n");
+                            });
+                        }
+                    }
+                }
+            }
+        });
+        JFXUtils.runUiThread(() -> {
+            if (serialPort != null) {
+                btnConfigurePort.setText(ControlResources.getString("CloseThePort"));
+                setScrollToBottom(textAreaShow.getText() + ControlResources.getString("OpenSerialPort") +
+                        "【" + serialPortParameter.getPortName() + "】"+ControlResources.getString("Success") +"\n");
+            } else {
+                if(curBaseItem.id!=0){
+                    showMessage(ControlResources.getString("OpenSerialPort") + "【" + serialPortParameter.getPortName() + "】"+ControlResources.getString("Fail"));
+                }
+                setScrollToBottom(textAreaShow.getText() +ControlResources.getString("OpenSerialPort") +
+                        "【" + serialPortParameter.getPortName() + "】"+ControlResources.getString("Fail") +"\n");
+            }
+        });
+    }
+    private String getRecvMsg(byte[] recvBytes){
+        StringBuilder msg = new StringBuilder();
+        int length = recvBytes.length;
+        int dataLen;
+        int otherLen = 5;
+        try {
+            for (int i = 0; i<length; i++){
+                if(recvBytes[i]==ADDR){
+                    if((i+2)<length){
+                        dataLen = Integer.parseInt(DataUtils.bytesToHexString(recvBytes[i+2]),16);
+                        if(i+dataLen+otherLen<=length){
+                            byte[] recvBytesTemp = new byte[dataLen+otherLen];
+                            System.arraycopy(recvBytes,i,recvBytesTemp,0,recvBytesTemp.length);
+
+                            //通信方式
+                            byte comMode = (byte) ((recvBytesTemp[1]&0x20)>>5);
+                            //后续帧标志
+//                            byte sfFlag = (byte) ((recvBytesTemp[1]&0x40)>>6);
+                            //功能码
+                            byte fcode = (byte) (recvBytesTemp[1]&0x1f);
+                            boolean isSrcAddr = true;
+
+                            if(comMode==(byte)0x01) {
+                                byte[] desAddrTemp = new byte[6];
+                                if(recvBytesTemp.length-(otherLen-2)>=desAddrTemp.length) {
+                                    System.arraycopy(recvBytesTemp, otherLen - 2, desAddrTemp, 0, desAddrTemp.length);
+                                }
+                                //源地址
+                                byte[] srcAddr = DataUtils.strAddrToByteAddr(srcAddrStr);
+                                isSrcAddr = Arrays.equals(desAddrTemp, srcAddr);
+                            }
+                            //CRC16M检验
+                            if (CRC16M.checkCode(recvBytesTemp)&&isSrcAddr) {
+                                byte[] srcAddrBytes = new byte[6];
+                                byte[] desAddrBytes = new byte[6];
+                                byte[] dataBytes;
+                                if(comMode==(byte)0x01) {
+                                    dataBytes = new byte[dataLen - srcAddrBytes.length - desAddrBytes.length];
+                                    System.arraycopy(recvBytesTemp, otherLen-2, desAddrBytes, 0, desAddrBytes.length);
+                                    ArrayUtils.reverse(desAddrBytes);
+                                    System.arraycopy(recvBytesTemp, otherLen-2 + desAddrBytes.length, srcAddrBytes, 0, srcAddrBytes.length);
+                                    ArrayUtils.reverse(srcAddrBytes);
+                                    System.arraycopy(recvBytesTemp, otherLen-2 + srcAddrBytes.length + desAddrBytes.length, dataBytes, 0, dataBytes.length);
+                                }else{
+                                    dataBytes = new byte[dataLen];
+                                    System.arraycopy(recvBytesTemp, otherLen-2, dataBytes, 0, dataBytes.length);
+                                }
+
+                                float num;
+                                String unit="";
+                                float multiple;
+                                List<String> strList = new ArrayList<>();
+                                int radix = 10,interval;
+                                //功能码判断
+                                if(fcode==(byte)0x01||fcode==(byte)0x02||fcode==(byte)0x0B||fcode==(byte)0x03
+                                        ||fcode==(byte)0x08||fcode==(byte)0x09||fcode==(byte)0x0A){
+                                    if(fcode==(byte)0x01){
+                                        multiple= 1000.0f;
+                                        interval = 3;
+                                        unit = "A";
+                                    }else if (fcode == (byte) 0x02){
+                                        multiple = 10.0f;
+                                        interval = 2;
+                                        unit = "V";
+                                    }else if(fcode==(byte)0x03){
+                                        multiple= 1000.0f;
+                                        interval = 3;
+                                        unit = "A";
+                                    }else if(fcode==(byte)0x08||fcode==(byte)0x09||fcode==(byte)0x0A){
+                                        multiple= 1000.0f;
+                                        interval = 3;
+                                        switch (fcode){
+                                            case (byte)0x08: unit = "kW";break;
+                                            case (byte)0x09: unit = "kvar"; break;
+                                            case (byte)0x0A: unit = "kVA"; break;
+                                            default: break;
+                                        }
+                                    }else {
+                                        multiple = 1.0f;
+                                        interval = 2;
+                                    }
+
+                                    if(cheackPhase(dataBytes,interval)){
+                                        strList.add(ControlResources.getString("Present"));
+                                    }else{
+                                        strList.add(ControlResources.getString("Aphase"));
+                                        strList.add(ControlResources.getString("Bphase"));
+                                        strList.add(ControlResources.getString("Cphase"));
+                                    }
+
+                                    msg = new StringBuilder(formatMsg(dataBytes, strList, unit, radix, multiple, interval));
+                                }else if(fcode==(byte)0x04){
+                                    multiple= 10.0f;
+                                    unit = "℃";
+                                    byte[] dataTemp = new byte[2];
+                                    System.arraycopy(dataBytes,0,dataTemp,0,dataTemp.length);
+                                    ArrayUtils.reverse(dataTemp);
+                                    num = Integer.parseInt(DataUtils.bytesToHexString(dataTemp),16)/multiple;
+                                    msg.append(ControlResources.getString("Temperature")).append("：").append(num).append(unit).append("\n");
+                                    num = Integer.parseInt(DataUtils.bytesToHexString(dataBytes[2]),16);
+                                    unit = "%";
+                                    msg.append(ControlResources.getString("Humidity")).append("：").append((int) num).append(unit);
+                                }else if(fcode==(byte)0x00||fcode==(byte)0x06||fcode==(byte)0x0D||fcode==(byte)0x05){
+                                    msg = new StringBuilder(dataBytes[0] == (byte) 0x00 ? ControlResources.getString("Success") : ControlResources.getString("Fail"));
+                                }else if(fcode==(byte)0x0C){
+                                    byte[] macAddrBytes = new byte[6];
+                                    System.arraycopy(dataBytes,1,macAddrBytes,0,macAddrBytes.length);
+                                    ArrayUtils.reverse(macAddrBytes);
+                                    byte[] parentAddrBytes = new byte[6];
+                                    System.arraycopy(dataBytes,1+macAddrBytes.length,parentAddrBytes,0,parentAddrBytes.length);
+                                    ArrayUtils.reverse(parentAddrBytes);
+                                    if(comMode==(byte)0x01) {
+                                        msg.append(ControlResources.getString("DestinationAddress")).append("：").append(DataUtils.bytesToHexString(desAddrBytes)).append("\n");
+                                        msg.append(ControlResources.getString("SourceAddress")).append("：").append(DataUtils.bytesToHexString(srcAddrBytes)).append("\n");
+                                    }
+                                    msg.append(ControlResources.getString("EquipmentType")).append("：").append(dataBytes[0] == 0x01 ? ControlResources.getString("BranchBoxSensor") : ControlResources.getString("MeterBoxSensor")).append("\n");
+                                    msg.append(ControlResources.getString("MacAddr")).append("：").append(DataUtils.bytesToHexString(macAddrBytes)).append("\n");
+                                    msg.append(ControlResources.getString("ParentNode.Addr")).append("：").append(DataUtils.bytesToHexString(parentAddrBytes)).append("\n");
+                                    msg.append(ControlResources.getString("SoftwareVersionNumber")).append("：").append(Integer.parseInt((DataUtils.bytesToHexString(dataBytes[macAddrBytes.length + parentAddrBytes.length + 1])), 16) / 10.0f);
+                                }else if(fcode==(byte)0x0E){
+                                    multiple= 10.0f;
+                                    unit = "℃";
+                                    radix = 16;
+                                    interval = 2;
+                                    if(cheackPhase(dataBytes,interval*2)){
+                                        strList.add(ControlResources.getString("FireWire"));
+                                    }else{
+                                        strList.add(ControlResources.getString("Aphase"));
+                                        strList.add(ControlResources.getString("Bphase"));
+                                        strList.add(ControlResources.getString("Cphase"));
+                                    }
+                                    strList.add(ControlResources.getString("ZeroLine"));
+                                    msg = new StringBuilder(formatMsg(dataBytes, strList, unit, radix, multiple, interval));
+                                }else if(fcode==(byte)0x07){
+                                    byte[] addrBytes = new byte[6];
+                                    byte phase = dataBytes[addrBytes.length];
+                                    System.arraycopy(dataBytes,0,addrBytes,0,addrBytes.length);
+                                    ArrayUtils.reverse(addrBytes);
+                                    if(comMode==(byte)0x01) {
+                                        msg.append(ControlResources.getString("DestinationAddress")).append("：").append(DataUtils.bytesToHexString(desAddrBytes)).append("\n");
+                                        msg.append(ControlResources.getString("SourceAddress")).append("：").append(DataUtils.bytesToHexString(srcAddrBytes)).append("\n");
+                                    }
+                                    msg.append(ControlResources.getString("MeterChildNodeAddr")).append("：").append(DataUtils.bytesToHexString(addrBytes)).append("\n");
+                                    msg.append(ControlResources.getString("Phase")).append("：");
+                                    switch (phase){
+                                        case (byte)0x01: msg.append(ControlResources.getString("Aphase")); break;
+                                        case (byte)0x02: msg.append(ControlResources.getString("Bphase")); break;
+                                        case (byte)0x03: msg.append(ControlResources.getString("Cphase")); break;
+                                        default: msg.append(ControlResources.getString("UnknownPhase")); break;
+                                    }
+                                    msg.append("\n");
+                                }else if(fcode==(byte)0x0F){
+                                    byte[] addrBytes = new byte[6];
+                                    int allNum = (dataBytes[1]<<8)|dataBytes[0];
+                                    int curNum = dataBytes[2];
+
+                                    if(comMode==(byte)0x01) {
+                                        msg.append(ControlResources.getString("DestinationAddress")).append("：").append(DataUtils.bytesToHexString(desAddrBytes)).append("\n");
+                                        msg.append(ControlResources.getString("SourceAddress")).append("：").append(DataUtils.bytesToHexString(srcAddrBytes)).append("\n");
+                                    }
+                                    msg.append(ControlResources.getString("TotalNumberOfAffiliateNodes")).append("：").append(allNum).append("\n");
+                                    msg.append(ControlResources.getString("NumberOfAffiliateNodes")).append("：").append(curNum).append("\n");
+
+                                    for (int j = 0; j < curNum; j++) {
+                                        System.arraycopy(dataBytes,j*addrBytes.length+3,addrBytes,0,addrBytes.length);
+                                        ArrayUtils.reverse(addrBytes);
+                                        msg.append(ControlResources.getString("MeterChildNodeAddr")).append(j + 1).append("：").append(DataUtils.bytesToHexString(addrBytes)).append("\n");
+                                    }
+                                }
+
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return msg.toString();
+    }
+
+    /**
+     * 检查相位
+     * @param dataBytes 数据
+     * @param interval 数据间隔
+     * @return true:单相，false:三相
+     */
+    private boolean cheackPhase(byte[] dataBytes, int interval){
+        int isPhase = 0;
+        byte noValue = (byte) 0xFF;
+        int len = dataBytes.length-interval;
+        for (int j =0;j<len;j++){
+            if(dataBytes[j] == noValue){
+                isPhase++;
+            }
+        }
+        return isPhase == len;
+    }
+
+    private String formatMsg(byte[] dataBytes, List<String> strList, String unit, int radix, float multiple, int interval){
+        StringBuilder msg = new StringBuilder();
+        float num;
+        byte[] dataTemp = new byte[interval];
+        int start = dataBytes.length/dataTemp.length-strList.size();
+        for (int j =0;j<strList.size();j++,start++){
+            if(dataBytes.length-start*dataTemp.length>=dataTemp.length) {
+                System.arraycopy(dataBytes, start * dataTemp.length, dataTemp, 0, dataTemp.length);
+            }
+            ArrayUtils.reverse(dataTemp);
+            num = Integer.parseInt(DataUtils.bytesToHexString(dataTemp),radix)/multiple;
+            msg.append(strList.get(j)).append("：").append(num).append(unit);
+            if(j!=strList.size()-1){
+                msg.append("\n");
+            }
+        }
+        return msg.toString();
+    }
+
+    private final Runnable task= () -> {
+        isReceive = false;
+        JFXUtils.runUiThread(() -> {
+            if (curBaseItem.id==13) {
+                labParentNodeResult.setText(ControlResources.getString("CommunicationTimeout"));
+                AnimationUtils.createTransition(labParentNodeResult, AnimationType.SHAKE).play();
+            } else if (curBaseItem.id==15) {
+                labNodeResult.setText(ControlResources.getString("CommunicationTimeout"));
+                AnimationUtils.createTransition(labNodeResult, AnimationType.SHAKE).play();
+            } else if (curBaseItem.id==16||curBaseItem.id==17) {
+                labChlidNodeResult.setText(ControlResources.getString("CommunicationTimeout"));
+                AnimationUtils.createTransition(labChlidNodeResult, AnimationType.SHAKE).play();
+            } else {
+                labResult.setText(ControlResources.getString("CommunicationTimeout"));
+                AnimationUtils.createTransition(labResult, AnimationType.SHAKE).play();
+            }
+            setScrollToBottom(textAreaShow.getText() +ControlResources.getString("Receive")+"：" + ControlResources.getString("CommunicationTimeout") +"\n");
+        });
+    };
+    ScheduledThreadPoolExecutor stpExecutor;
+    private boolean isReceive;
+    private void sendData() {
+        if(serialPort==null){
+            if(curBaseItem.id!=0){
+                showMessage(ControlResources.getString("OpenTheSerialPort.Tip"));
+            }
+            setScrollToBottom(textAreaShow.getText() +ControlResources.getString("OpenTheSerialPort.Tip") +"\n");
+            return;
+        }
+
+        if(isReceive){
+            return;
+        }
+
+        if(curBaseItem!=null&&curBaseItem.id!=0){
+            srcAddrStr = tfSourceAddress.getText().replace(" ", "").toUpperCase();
+            desAddrStr = tfDestinationAddress.getText().replace(" ", "").toUpperCase();
+
+            if(StringUtils.isEmpty(srcAddrStr)||srcAddrStr.length()>12){
+                showMessage(ControlResources.getString("SourceAddress.Tip"), Message.Type.ERROR);
+                AnimationUtils.createTransition(tfSourceAddress, AnimationType.SHAKE).play();
+                tfSourceAddress.requestFocus();
+                return;
+            }
+            if(StringUtils.isNotEmpty(srcAddrStr)) {
+                srcAddrStr = DataUtils.formatAddress(srcAddrStr);
+                tfSourceAddress.setText(srcAddrStr);
+            }
+            if(desAddrStr.length()>12){
+                showMessage(ControlResources.getString("DestinationAddress.Tip"), Message.Type.ERROR);
+                AnimationUtils.createTransition(tfDestinationAddress, AnimationType.SHAKE).play();
+                tfDestinationAddress.requestFocus();
+                return;
+            }
+            if(StringUtils.isNotEmpty(desAddrStr)) {
+                desAddrStr = DataUtils.formatAddress(desAddrStr);
+                tfDestinationAddress.setText(desAddrStr);
+            }
+
+            if(curBaseItem.id==13){
+                parentAddrStr = tfParentNode.getText().replace(" ", "").toUpperCase();
+                if(StringUtils.isEmpty(parentAddrStr)||parentAddrStr.length()>12){
+                    showMessage(ControlResources.getString("ParentNode.Addr.Tip"), Message.Type.ERROR);
+                    AnimationUtils.createTransition(tfParentNode, AnimationType.SHAKE).play();
+                    tfParentNode.requestFocus();
+                    return;
+                }
+                parentAddrStr = DataUtils.formatAddress(parentAddrStr);
+                tfParentNode.setText(parentAddrStr);
+                labParentNodeResult.setText("");
+            }else if(curBaseItem.id==15){
+                startNum = tfStartNum.getText().replace(" ", "").toUpperCase();
+                pageNum = tfPageNum.getText().replace(" ", "").toUpperCase();
+                if(StringUtils.isEmpty(startNum)){
+                    showMessage(ControlResources.getString("ChildNodeQuery.StartNum.Tip"), Message.Type.ERROR);
+                    AnimationUtils.createTransition(tfStartNum, AnimationType.SHAKE).play();
+                    tfStartNum.requestFocus();
+                    return;
+                }
+                if(StringUtils.isEmpty(pageNum)||Integer.parseInt(pageNum)>16){
+                    showMessage(ControlResources.getString("ChildNodeQuery.PageNum.Tip"), Message.Type.ERROR);
+                    AnimationUtils.createTransition(tfPageNum, AnimationType.SHAKE).play();
+                    tfPageNum.requestFocus();
+                    return;
+                }
+                labNodeResult.setText("");
+            }else if (curBaseItem.id==16||curBaseItem.id==17) {
+                for (int i = 0; i < gpChildNode.getChildren().size()/3; i++) {
+                    TextField tfChildNode= findView(gpChildNode,"#tfChildNode"+i);
+                    String tfChildNodeStr = tfChildNode.getText().replace(" ", "").toUpperCase();
+                    if(StringUtils.isEmpty(tfChildNodeStr)){
+                        showMessage(ControlResources.getString("ChildNode.Addr.Tip")+i, Message.Type.ERROR);
+                        AnimationUtils.createTransition(tfChildNode, AnimationType.SHAKE).play();
+                        tfChildNode.requestFocus();
+                        return;
+                    }
+                    tfChildNodeStr = DataUtils.formatAddress(tfChildNodeStr);
+                    tfChildNode.setText(tfChildNodeStr);
+                }
+                labChlidNodeResult.setText("");
+            }else{
+                labResult.setText("");
+            }
+
+            //组报文发送帧
+            textArea.setText(sendWriteStr());
+        }
+
+        //发送16进制数据——实际应用中串口通信传输的数据，大都是 16 进制
+        String hexStrCode = textArea.getText().replace("\n","");
+        if(hexStrCode.length() == 0){
+            setScrollToBottom(textAreaShow.getText() +ControlResources.getString("SendContent.Tip") +"\n");
+            return;
+        }
+        isReceive = true;
+        byte[] bytes = SerialPortTool.hexStringToBytes(hexStrCode);
+        hexStrCode =  DataUtils.separatedByChr(Objects.requireNonNull(SerialPortTool.bytesToHexString(bytes)).toUpperCase(),2," ");
+        SerialPortTool.sendData(serialPort, bytes);
+        textArea.setText(hexStrCode);
+        setScrollToBottom(textAreaShow.getText()+ControlResources.getString("Send") + "："+ hexStrCode  + "\n");
+        stpExecutor = ThreadPoolUtils.runDelayTime(task,timeout);
+    }
+
+    private final byte ADDR= (byte)0x00;
+    private String srcAddrStr;
+    private String desAddrStr;
+    private String parentAddrStr;
+    private String startNum;
+    private String pageNum;
+
+    private String sendWriteStr(){
+        byte[] senBytes = new byte[256];
+        int count = 3;
+        byte com = 0x20;
+        if(StringUtils.isNotEmpty(srcAddrStr)&&StringUtils.isNotEmpty(desAddrStr)) {
+            //源地址
+            byte[] srcAddr = DataUtils.strAddrToByteAddr(srcAddrStr);
+            //目的地址
+            byte[] desAddr = DataUtils.strAddrToByteAddr(desAddrStr);
+            if(desAddr!=null) {
+                System.arraycopy(desAddr, 0, senBytes, count, desAddr.length);
+                count += 6;
+            }
+            if(srcAddr!=null) {
+                System.arraycopy(srcAddr, 0, senBytes, count, srcAddr.length);
+                count += 6;
+            }
+        }else{
+            com = 0x00;
+        }
+
+        if(curBaseItem.id==13) {
+            byte[] parentAddr = DataUtils.strAddrToByteAddr(parentAddrStr);//父节点地址
+            if(parentAddr!=null){
+                System.arraycopy(parentAddr,0,senBytes,count,parentAddr.length);//填入父节点地址
+                count+=6;
+            }
+        }else if(curBaseItem.id==15){
+            senBytes[count++] = Byte.parseByte(startNum);
+            senBytes[count++] = Byte.parseByte(pageNum);
+        }else if(curBaseItem.id==16||curBaseItem.id==17){
+            for (int i = 0; i < gpChildNode.getChildren().size()/3; i++) {
+                TextField tfChildNode= findView(gpChildNode,"#tfChildNode"+i);
+                String tfChildNodeStr = tfChildNode.getText().replace(" ", "").toUpperCase();
+                //子节点地址
+                byte[] childAddr = DataUtils.strAddrToByteAddr(tfChildNodeStr);
+                if(childAddr!=null){
+                    System.arraycopy(childAddr,0,senBytes,count,childAddr.length);
+                    count+=6;
+                }
+            }
+        }
+
+        senBytes[0]= ADDR;//地址A
+        senBytes[1]= (byte) (curBaseItem.value|com);//功能码FUN
+        senBytes[2]= (byte) (count - 3);//数据域-数据长度L
+        senBytes = CRC16M.updateCheckCode(senBytes,count);
+        return DataUtils.bytesToHexString(senBytes);
+    }
+
+    private void stopData() {
+        isReceive = false;
+        if(stpExecutor!=null){
+            stpExecutor.shutdownNow();
+        }
+    }
+
+    private void setScrollToBottom(String txt){
+        textAreaShow.setText(txt);
+        textAreaShow.setScrollTop(Double.MAX_VALUE);
     }
 }

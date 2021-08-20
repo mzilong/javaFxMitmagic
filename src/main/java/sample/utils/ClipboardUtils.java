@@ -16,7 +16,12 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-
+/**
+ * 拷贝工具类
+ * @author: MI
+ * Description:ClipboardUtils
+ * Data: 2021/8/20 10:30
+ */
 public class ClipboardUtils {
     /**
      * 把数据设置到系统剪贴板（复制）
@@ -48,24 +53,24 @@ public class ClipboardUtils {
     /**
      * 获取系统剪贴板的数据（粘贴）
      */
-    public static <T extends Object> T getClipboardContent(Clipboard clipboard ,DataFormat dataFormat) {
+    public static Object getClipboardContent(Clipboard clipboard ,DataFormat dataFormat) {
         // 获取剪贴板的数据
-        return (T) clipboard.getContent(dataFormat);
+        return clipboard.getContent(dataFormat);
     }
 
     /**
      * 获取系统剪贴板的数据（粘贴）
      */
-    public static <T extends Object> T getClipboardContent(DataFormat dataFormat) {
+    public static Object getClipboardContent(DataFormat dataFormat) {
         // 获取系统剪贴板
         Clipboard clipboard = getClipboard();
         // 获取剪贴板的数据
-        return (T) getClipboardContent(clipboard,dataFormat);
+        return getClipboardContent(clipboard,dataFormat);
     }
 
     /**
      * 添加Clipboard中的内容（一般拖拽和粘贴）
-     * @param pane
+     * @param pane 指定容器
      */
     public static void addClipboardContent(Pane pane){
         // 获取系统剪贴板
@@ -74,7 +79,7 @@ public class ClipboardUtils {
     }
     /**
      * 添加Clipboard中的内容（一般拖拽和粘贴）
-     * @param clipboard
+     * @param clipboard 拷贝对象
      * @param pane 指定容器下增加new HBox()-->new ImageView()
      */
     public static void addClipboardContent(Clipboard clipboard ,Pane pane){
@@ -97,11 +102,10 @@ public class ClipboardUtils {
             }
         }else if(clipboard.hasString()){
             Image image = ImageHelper.image(clipboard.getString());
+            pane.getChildren().clear();
             if(image!=null){
-                pane.getChildren().clear();
                 pane.getChildren().add(new HBox(new ImageView(image)));
             }else{
-                pane.getChildren().clear();
                 HBox hBox = new HBox(new Label(clipboard.getString()));
                 hBox.setStyle("-fx-background-color:white");
                 pane.getChildren().add(hBox);
@@ -118,7 +122,7 @@ public class ClipboardUtils {
 
     /**
      * 设置拖动检测到的节点
-     * @param nodes
+     * @param nodes 指定节点
      */
     public static void setDragDetectedNode(Node... nodes){
         for (Node node: nodes) {
@@ -148,7 +152,7 @@ public class ClipboardUtils {
 
     /**
      * 设置拖放窗格
-     * @param panes
+     * @param panes 指定容器集
      */
     public static void setDragDroppedPane(Pane... panes){
         for (Pane pane: panes) {
