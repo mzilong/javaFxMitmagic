@@ -25,3 +25,6 @@ javafx.controls,javafx.fxml
 --add-exports
 javafx.base/com.sun.javafx.event=ALL-UNNAMED
 
+====================================================
+提示：本项目直接maven package运行打包,然后windows 用inno setup生成安装包
+

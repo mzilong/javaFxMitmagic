@@ -14,36 +14,24 @@ import java.util.prefs.Preferences;
  */
 public class PreferencesTools {
 
-    public static Preferences preferences = Preferences.userRoot();
+    public static Preferences urPreferences = Preferences.userRoot().node("javafx_mitmagic");
+    public static Preferences srPreferences = Preferences.systemRoot().node("javafx_mitmagic");
 
     public static List<BaseItem<Locale>> LANGUAGES = new ArrayList<>();
     static {
-        LANGUAGES.add(new BaseItem<>(0, "中文", Locale.CHINA));
+        LANGUAGES.add(new BaseItem<>(0, "中文", Locale.CHINESE));
         LANGUAGES.add(new BaseItem<>(1, "English", Locale.ENGLISH));
     }
 
-
-    public static String getFxBasePref() {
-        if(preferences!=null){
-            return preferences.get("-fx-base","#0091ea");
-        }
-
-        return "#0091ea";
-    }
-
-    public static void setFxBasePref(String value) {
-        preferences.put("-fx-base",value);
-    }
-
     public static String getLanguage(){
-        if(preferences!=null){
-            return preferences.get("language", Locale.CHINA.getLanguage());
+        if(srPreferences!=null){
+            return srPreferences.get("language", Locale.CHINESE.getLanguage());
         }
         return LANGUAGES.get(0).value.getLanguage();
     }
 
     public static void setLanguage(Locale locale) {
-        preferences.put("language",locale.getLanguage());
+        srPreferences.put("language",locale.getLanguage());
         setDefaultLocale(locale);
     }
 
@@ -59,5 +47,17 @@ public class PreferencesTools {
 
     public static void setDefaultLocale(Locale locale){
         Locale.setDefault(locale);
+    }
+
+    public static String getFxBasePref() {
+        if(urPreferences!=null){
+            return urPreferences.get("-fx-base","#0091ea");
+        }
+
+        return "#0091ea";
+    }
+
+    public static void setFxBasePref(String value) {
+        urPreferences.put("-fx-base",value);
     }
 }

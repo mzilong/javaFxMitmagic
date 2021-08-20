@@ -64,7 +64,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 public class MainController extends BaseController {
 
     public ColorPicker colorPicker;
-    public BreadCrumbBar<String> breadCrumbBar;
+    public BreadCrumbBar<Object> breadCrumbBar;
     public TreeView<BaseItem<Byte>> treeView;
     public ComboBox<FontItem> cbFont;
     public ComboBox<BaseItem<Locale>> cbLanguage;
@@ -176,7 +176,7 @@ public class MainController extends BaseController {
         );
 
         //导航条
-        TreeItem<String> model = BreadCrumbBar.buildTreeModel(ControlResources.getString("Function"));
+        TreeItem<Object> model = BreadCrumbBar.buildTreeModel(ControlResources.getString("Function"));
         breadCrumbBar.setSelectedCrumb(model);
         breadCrumbBar.setAutoNavigationEnabled(false);
         vboxMain.getChildren().remove(breadCrumbBar);
@@ -244,7 +244,7 @@ public class MainController extends BaseController {
                 str.add(item.getValue().name);
             }
             Collections.reverse(str);
-            TreeItem<String> model1 =  BreadCrumbBar.buildTreeModel((String[])str.toArray());
+            TreeItem<Object> model1 =  BreadCrumbBar.buildTreeModel(str.toArray());
             breadCrumbBar.setSelectedCrumb(model1);
             if (baseItem.id==0) {
                 parentContainer.toFront();

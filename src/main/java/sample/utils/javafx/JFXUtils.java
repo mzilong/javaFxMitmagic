@@ -254,7 +254,7 @@ public class JFXUtils {
      * @return 返回给定颜色的十六进制web字符串,例如 (#302015)
      */
     public static String colorToWebColor(final Color color) {
-        return color.toString().replace("0x","#").toUpperCase();
+        return color.toString().replace("0x","#");
     }
 
 
