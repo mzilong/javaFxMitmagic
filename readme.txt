@@ -27,5 +27,6 @@ javafx.base/com.sun.javafx.event=ALL-UNNAMED
 
 ====================================================
 idea运行流程说明：运行无法设置字体或者颜色的时候就打开regedit,跳转到【计算机\HKEY_LOCAL_MACHINE\SOFTWARE\JavaSoft\Prefs】-右键设置权限-用户-完全控制
+
 打包流程说明：本项目直接maven package运行打包,然后windows系统就双击项目下output/.iss配置文件打开inno setup生成安装包
 

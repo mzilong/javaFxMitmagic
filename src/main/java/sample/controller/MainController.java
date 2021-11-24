@@ -747,12 +747,18 @@ public class MainController extends BaseController {
                                 }else if(fcode==(byte)0x04){
                                     multiple= 10.0f;
                                     unit = "℃";
+                                    radix = 16;
                                     byte[] dataTemp = new byte[2];
                                     System.arraycopy(dataBytes,0,dataTemp,0,dataTemp.length);
                                     ArrayUtils.reverse(dataTemp);
-                                    num = Integer.parseInt(DataUtils.bytesToHexString(dataTemp),16)/multiple;
+                                    int numTemp = DataUtils.byteArrayToInt(dataTemp,dataTemp.length);
+                                    if(DataUtils.integerToBinary(numTemp).length()>=16){
+                                        num = -Integer.parseInt(Integer.toBinaryString(~(numTemp - 1)).substring(16), 2)/multiple;
+                                    }else{
+                                        num = numTemp/multiple;
+                                    }
                                     msg.append(ControlResources.getString("Temperature")).append("：").append(num).append(unit).append("\n");
-                                    num = Integer.parseInt(DataUtils.bytesToHexString(dataBytes[2]),16);
+                                    num = Integer.parseInt(DataUtils.bytesToHexString(dataBytes[2]),radix);
                                     unit = "%";
                                     msg.append(ControlResources.getString("Humidity")).append("：").append((int) num).append(unit);
                                 }else if(fcode==(byte)0x00||fcode==(byte)0x06||fcode==(byte)0x0D||fcode==(byte)0x05){
@@ -785,7 +791,23 @@ public class MainController extends BaseController {
                                         strList.add(ControlResources.getString("Cphase"));
                                     }
                                     strList.add(ControlResources.getString("ZeroLine"));
-                                    msg = new StringBuilder(formatMsg(dataBytes, strList, unit, radix, multiple, interval));
+                                    byte[] dataTemp = new byte[interval];
+                                    int start = dataBytes.length/dataTemp.length-strList.size();
+                                    for (int j =0;j<strList.size();j++,start++){
+                                        if(dataBytes.length-start*dataTemp.length>=dataTemp.length) {
+                                            System.arraycopy(dataBytes, start * dataTemp.length, dataTemp, 0, dataTemp.length);
+                                        }
+                                        ArrayUtils.reverse(dataTemp);
+                                        num = DataUtils.byteArrayToInt(dataTemp,dataTemp.length)/multiple;
+                                        if(DataUtils.integerToBinary(dataBytes[1]).length()>8){
+                                            num -= Math.pow(2,dataTemp.length/2*8);
+                                        }
+                                        msg.append(strList.get(j)).append("：").append(num).append(unit);
+                                        if(j!=strList.size()-1){
+                                            msg.append("\n");
+                                        }
+                                    }
+//                                    msg = new StringBuilder(formatMsg(dataBytes, strList, unit, radix, multiple, interval));
                                 }else if(fcode==(byte)0x07){
                                     byte[] addrBytes = new byte[6];
                                     byte phase = dataBytes[addrBytes.length];
