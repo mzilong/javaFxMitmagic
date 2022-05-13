@@ -54,6 +54,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.regex.Pattern;
 
 /**
  * @author: mzl
@@ -72,7 +73,7 @@ public class MainController extends BaseController {
 
     public StackPane container;
     public AnchorPane parentContainer, parentResult,
-            parentParentNode, parentNodeManagement, parentChildNode;
+            parentParentNode, parentNodeManagement, parentChildNode,parentCurrentAndVoltageCalibration,parentMacConfig;
 
     public ComboBox<String> cbPortName;
     public ComboBox<Integer> cbBaudRate;
@@ -107,6 +108,12 @@ public class MainController extends BaseController {
     public GridPane gpChildNode;
     public VBox vboxMain;
     public Button btnOpenAscii;
+    public TextField tfACurrentNum,tfBCurrentNum,tfCCurrentNum,tfNCurrentNum;
+    public TextField tfAVoltageNum,tfBVoltageNum,tfCVoltageNum;
+    public TextField tfPassword;
+    public TextArea labCalibrationResult;
+    public TextArea labMacResult;
+    public TextField tfMacPassword,tfMac;
 
 
     private SerialPortParameter serialPortParameter;
@@ -201,6 +208,7 @@ public class MainController extends BaseController {
                 new TreeItem<>(new BaseItem<>(13,ControlResources.getString("ParentNode"), (byte)0x0D)),
                 new TreeItem<>(new BaseItem<>(14,ControlResources.getString("CableTemperature"), (byte)0x0E)),
                 new TreeItem<>(new BaseItem<>(18,ControlResources.getString("CurrentAndVoltageCalibration"), (byte)0x12)),
+                new TreeItem<>(new BaseItem<>(19,ControlResources.getString("Configure.Mac"), (byte)0x13)),
                 nodeTreeItem
 
         );
@@ -260,6 +268,12 @@ public class MainController extends BaseController {
             } else if (baseItem.id==16||baseItem.id==17) {
                 parentChildNode.toFront();
                 labChlidNodeResult.setText("");
+            } else if (baseItem.id==18) {
+                parentCurrentAndVoltageCalibration.toFront();
+                labCalibrationResult.setText("");
+            }  else if (baseItem.id==19) {
+                parentMacConfig.toFront();
+                labMacResult.setText("");
             } else {
                 parentResult.toFront();
                 labResult.setText("");
@@ -311,38 +325,50 @@ public class MainController extends BaseController {
                 break;
             }
         }
-        addTextLimiter(tfSourceAddress,0,12);
-        addTextLimiter(tfDestinationAddress,0,12);
-        addTextLimiter(tfParentNode,0,12);
+        addTextLimiter(tfSourceAddress,2,12);
+        addTextLimiter(tfDestinationAddress,2,12);
+        addTextLimiter(tfParentNode,2,12);
+        addTextLimiter(tfPassword,2,3);
+        addTextLimiter(tfMacPassword,2,3);
+        addTextLimiter(tfMac,2,12);
         addTextLimiter(tfStartNum,1,2);
         addTextLimiter(tfPageNum,1,2);
+
+        addTextLimiter(tfACurrentNum,3,4);
+        addTextLimiter(tfBCurrentNum,3,4);
+        addTextLimiter(tfCCurrentNum,3,4);
+        addTextLimiter(tfNCurrentNum,3,4);
+        addTextLimiter(tfAVoltageNum,3,4);
+        addTextLimiter(tfBVoltageNum,3,4);
+        addTextLimiter(tfCVoltageNum,3,4);
     }
 
-    public void addTextLimiter(final TextField tf, int charsType, final int maxLength){
-        String chars = "0123456789ABCDEF";
-        if(charsType == 1){
-            chars = "0123456789";
+    public void addTextLimiter(final TextField tf, int patternType, final int maxLength){
+        String matches = null;
+        if(patternType == 1){
+            matches = "[0-9]+";
+        }else if(patternType == 2){
+            matches = "[A-Fa-f0-9]+";
+        }else if(patternType == 3){
+            matches = "(\\-)?(\\d)*";
         }
-        final String finalChars = chars;
+        String finalMatches = matches;
         tf.textProperty().addListener((ov, oldValue, newValue) -> {
-            if(newValue!=null){
-                boolean isExist = true;
-                for (String str: newValue.split("")) {
-                    if(!finalChars.contains(str.toUpperCase())){
-                        isExist = false;
-                        break;
-                    }
+            if(newValue!=null&&newValue.length()>0&&finalMatches!=null){
+                boolean isExist = false;
+                if(Pattern.compile(finalMatches).matcher(newValue).matches()){
+                    isExist = true;
                 }
                 if(!isExist){
                     tf.setText(oldValue);
                 }
-
+            }
+            if(newValue!=null&&newValue.length()>0&&maxLength!=-1){
                 if (tf.getText().length() > maxLength) {
                     String s = tf.getText().substring(0, maxLength);
                     tf.setText(s);
                 }
             }
-
         });
     }
 
@@ -352,8 +378,10 @@ public class MainController extends BaseController {
         parentParentNode = JFXUtils.getParent("fxml/fun/parent_node.fxml");
         parentNodeManagement = JFXUtils.getParent("fxml/fun/child_node_management.fxml");
         parentChildNode = JFXUtils.getParent("fxml/fun/child_node.fxml");
+        parentCurrentAndVoltageCalibration = JFXUtils.getParent("fxml/fun/current_and_voltage_calibration.fxml");
+        parentMacConfig = JFXUtils.getParent("fxml/fun/mac_config.fxml");
 
-        container.getChildren().addAll(parentResult,parentParentNode,parentNodeManagement, parentChildNode,parentContainer);
+        container.getChildren().addAll(parentResult,parentParentNode,parentNodeManagement, parentChildNode,parentCurrentAndVoltageCalibration,parentMacConfig,parentContainer);
 
         btnSend = findView(parentContainer,"#btnSend");
         btnSend.setOnAction(this::onButtonClick);
@@ -384,6 +412,26 @@ public class MainController extends BaseController {
         ((VBox) findView(parentChildNode,"#vboxChildNode")).getChildren().addAll(
                 setNodeTitleBorder(findView(parentChildNode,"#hboxChildNode"),ControlResources.getString("DataField")),
                 setNodeTitleBorder(findView(parentChildNode,"#apChildNodeResult"),ControlResources.getString("ReceiveData")));
+
+        tfPassword = findView(parentCurrentAndVoltageCalibration,"#tfPassword");
+        tfACurrentNum = findView(parentCurrentAndVoltageCalibration,"#tfACurrentNum");
+        tfBCurrentNum = findView(parentCurrentAndVoltageCalibration,"#tfBCurrentNum");
+        tfCCurrentNum = findView(parentCurrentAndVoltageCalibration,"#tfCCurrentNum");
+        tfNCurrentNum = findView(parentCurrentAndVoltageCalibration,"#tfNCurrentNum");
+        tfAVoltageNum = findView(parentCurrentAndVoltageCalibration,"#tfAVoltageNum");
+        tfBVoltageNum = findView(parentCurrentAndVoltageCalibration,"#tfBVoltageNum");
+        tfCVoltageNum = findView(parentCurrentAndVoltageCalibration,"#tfCVoltageNum");
+        labCalibrationResult = findView(parentCurrentAndVoltageCalibration,"#labCalibrationResult");
+        ((VBox) findView(parentCurrentAndVoltageCalibration,"#vboxCalibration")).getChildren().addAll(
+                setNodeTitleBorder(findView(parentCurrentAndVoltageCalibration,"#apCalibration"),ControlResources.getString("DataField")),
+                setNodeTitleBorder(findView(parentCurrentAndVoltageCalibration,"#apCalibrationResult"),ControlResources.getString("ReceiveData")));
+
+        tfMacPassword = findView(parentMacConfig,"#tfMacPassword");
+        tfMac = findView(parentMacConfig,"#tfMac");
+        labMacResult = findView(parentMacConfig,"#labMacResult");
+        ((VBox) findView(parentMacConfig,"#vboxMac")).getChildren().addAll(
+                setNodeTitleBorder(findView(parentMacConfig,"#apMac"),ControlResources.getString("DataField")),
+                setNodeTitleBorder(findView(parentMacConfig,"#apMacResult"),ControlResources.getString("ReceiveData")));
     }
 
     private void addNode(){
@@ -632,9 +680,13 @@ public class MainController extends BaseController {
                                     labParentNodeResult.setText(recMsg);
                                 }else if(curBaseItem.id==15){
                                     labNodeResult.setText(recMsg);
-                                } else if (curBaseItem.id==16||curBaseItem.id==17) {
+                                }else if (curBaseItem.id==16||curBaseItem.id==17) {
                                     labChlidNodeResult.setText(recMsg);
-                                } else{
+                                }else if(curBaseItem.id==18){
+                                    labCalibrationResult.setText(recMsg);
+                                }else if(curBaseItem.id==19){
+                                    labMacResult.setText(recMsg);
+                                }else{
                                     labResult.setText(recMsg);
                                 }
                                 setScrollToBottom(textAreaShow.getText() +ControlResources.getString("Receive")+ "：" +
@@ -929,6 +981,12 @@ public class MainController extends BaseController {
             } else if (curBaseItem.id==16||curBaseItem.id==17) {
                 labChlidNodeResult.setText(ControlResources.getString("CommunicationTimeout"));
                 AnimationUtils.createTransition(labChlidNodeResult, AnimationType.SHAKE).play();
+            } else if (curBaseItem.id==18) {
+                labCalibrationResult.setText(ControlResources.getString("CommunicationTimeout"));
+                AnimationUtils.createTransition(labCalibrationResult, AnimationType.SHAKE).play();
+            }  else if (curBaseItem.id==19) {
+                labMacResult.setText(ControlResources.getString("CommunicationTimeout"));
+                AnimationUtils.createTransition(labMacResult, AnimationType.SHAKE).play();
             } else {
                 labResult.setText(ControlResources.getString("CommunicationTimeout"));
                 AnimationUtils.createTransition(labResult, AnimationType.SHAKE).play();
@@ -1017,6 +1075,83 @@ public class MainController extends BaseController {
                     tfChildNode.setText(tfChildNodeStr);
                 }
                 labChlidNodeResult.setText("");
+            }else if(curBaseItem.id==18){
+                password = tfPassword.getText().replace(" ", "").toUpperCase();
+                aCurrentNum = tfACurrentNum.getText().replace(" ", "");
+                bCurrentNum = tfBCurrentNum.getText().replace(" ", "");
+                cCurrentNum = tfCCurrentNum.getText().replace(" ", "");
+                nCurrentNum = tfNCurrentNum.getText().replace(" ", "");
+                aVoltageNum = tfAVoltageNum.getText().replace(" ", "");
+                bVoltageNum = tfBVoltageNum.getText().replace(" ", "");
+                cVoltageNum = tfCVoltageNum.getText().replace(" ", "");
+                if(StringUtils.isEmpty(password)||password.length()!=3){
+                    showMessage(ControlResources.getString("password.Tip"), Message.Type.ERROR);
+                    AnimationUtils.createTransition(tfPassword, AnimationType.SHAKE).play();
+                    tfPassword.requestFocus();
+                    return;
+                }
+                if(StringUtils.isEmpty(aCurrentNum)||Integer.parseInt(aCurrentNum)>127||Integer.parseInt(aCurrentNum)<-128){
+                    showMessage(ControlResources.getString("Compensation.Tip"), Message.Type.ERROR);
+                    AnimationUtils.createTransition(tfACurrentNum, AnimationType.SHAKE).play();
+                    tfACurrentNum.requestFocus();
+                    return;
+                }
+                if(StringUtils.isEmpty(bCurrentNum)||Integer.parseInt(bCurrentNum)>127||Integer.parseInt(bCurrentNum)<-128){
+                    showMessage(ControlResources.getString("Compensation.Tip"), Message.Type.ERROR);
+                    AnimationUtils.createTransition(tfBCurrentNum, AnimationType.SHAKE).play();
+                    tfBCurrentNum.requestFocus();
+                    return;
+                }
+                if(StringUtils.isEmpty(cCurrentNum)||Integer.parseInt(cCurrentNum)>127||Integer.parseInt(cCurrentNum)<-128){
+                    showMessage(ControlResources.getString("Compensation.Tip"), Message.Type.ERROR);
+                    AnimationUtils.createTransition(tfCCurrentNum, AnimationType.SHAKE).play();
+                    tfCCurrentNum.requestFocus();
+                    return;
+                }
+                if(StringUtils.isEmpty(nCurrentNum)||Integer.parseInt(nCurrentNum)>127||Integer.parseInt(nCurrentNum)<-128){
+                    showMessage(ControlResources.getString("Compensation.Tip"), Message.Type.ERROR);
+                    AnimationUtils.createTransition(tfNCurrentNum, AnimationType.SHAKE).play();
+                    tfNCurrentNum.requestFocus();
+                    return;
+                }
+                if(StringUtils.isEmpty(aVoltageNum)||Integer.parseInt(aVoltageNum)>127||Integer.parseInt(aVoltageNum)<-128){
+                    showMessage(ControlResources.getString("Compensation.Tip"), Message.Type.ERROR);
+                    AnimationUtils.createTransition(tfAVoltageNum, AnimationType.SHAKE).play();
+                    tfAVoltageNum.requestFocus();
+                    return;
+                }
+                if(StringUtils.isEmpty(bVoltageNum)||Integer.parseInt(bVoltageNum)>127||Integer.parseInt(bVoltageNum)<-128){
+                    showMessage(ControlResources.getString("Compensation.Tip"), Message.Type.ERROR);
+                    AnimationUtils.createTransition(tfBVoltageNum, AnimationType.SHAKE).play();
+                    tfBVoltageNum.requestFocus();
+                    return;
+                }
+                if(StringUtils.isEmpty(cVoltageNum)||Integer.parseInt(cVoltageNum)>127||Integer.parseInt(cVoltageNum)<-128){
+                    showMessage(ControlResources.getString("Compensation.Tip"), Message.Type.ERROR);
+                    AnimationUtils.createTransition(tfCVoltageNum, AnimationType.SHAKE).play();
+                    tfCVoltageNum.requestFocus();
+                    return;
+                }
+                labCalibrationResult.setText("");
+            }else if (curBaseItem.id==19) {
+                password = tfMacPassword.getText().replace(" ", "").toUpperCase();
+                macAddrStr = tfMac.getText().replace(" ", "").toUpperCase();
+
+                if(StringUtils.isEmpty(password)||password.length()!=3){
+                    showMessage(ControlResources.getString("password.Tip"), Message.Type.ERROR);
+                    AnimationUtils.createTransition(tfMacPassword, AnimationType.SHAKE).play();
+                    tfMacPassword.requestFocus();
+                    return;
+                }
+                if(StringUtils.isEmpty(macAddrStr)||macAddrStr.length()>12){
+                    showMessage(ControlResources.getString("Mac.Addr.Tip"), Message.Type.ERROR);
+                    AnimationUtils.createTransition(tfMac, AnimationType.SHAKE).play();
+                    tfMac.requestFocus();
+                    return;
+                }
+                macAddrStr = DataUtils.formatAddress(macAddrStr);
+                tfMac.setText(macAddrStr);
+                labMacResult.setText("");
             }else{
                 labResult.setText("");
             }
@@ -1044,8 +1179,12 @@ public class MainController extends BaseController {
     private String srcAddrStr;
     private String desAddrStr;
     private String parentAddrStr;
+    private String macAddrStr;
     private String startNum;
     private String pageNum;
+
+    private String password;
+    private String aCurrentNum,bCurrentNum,cCurrentNum,nCurrentNum,aVoltageNum,bVoltageNum,cVoltageNum;
 
     private String sendWriteStr(){
         byte[] senBytes = new byte[256];
@@ -1088,9 +1227,27 @@ public class MainController extends BaseController {
                     count+=6;
                 }
             }
+        }else if(curBaseItem.id==18){
+            byte[] passwordAddr = DataUtils.stringToByteArray(password);//父节点地址
+            senBytes[count++] = passwordAddr[0];
+            senBytes[count++] = passwordAddr[1];
+            senBytes[count++] = passwordAddr[2];
+            senBytes[count++] = Byte.parseByte(aCurrentNum);
+            senBytes[count++] = Byte.parseByte(bCurrentNum);
+            senBytes[count++] = Byte.parseByte(cCurrentNum);
+            senBytes[count++] = Byte.parseByte(nCurrentNum);
+            senBytes[count++] = Byte.parseByte(aVoltageNum);
+            senBytes[count++] = Byte.parseByte(bVoltageNum);
+            senBytes[count++] = Byte.parseByte(cVoltageNum);
+        }else if(curBaseItem.id==19) {
+            byte[] macAddr = DataUtils.strAddrToByteAddr(macAddrStr);//父节点地址
+            if(macAddr!=null){
+                System.arraycopy(macAddr,0,senBytes,count,macAddr.length);//填入父节点地址
+                count+=6;
+            }
         }
 
-        senBytes[0]= ADDR;//地址A
+            senBytes[0]= ADDR;//地址A
         senBytes[1]= (byte) (curBaseItem.value|com);//功能码FUN
         senBytes[2]= (byte) (count - 3);//数据域-数据长度L
         senBytes = CRC16M.updateCheckCode(senBytes,count);
