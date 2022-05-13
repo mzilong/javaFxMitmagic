@@ -7,7 +7,7 @@
 #define MyAppReg  "javafx_mitmagic"
 
 #define MyAppName "物理拓扑技术与应用"
-#define MyAppVersion "1.2"
+#define MyAppVersion "1.4"
 #define MyAppPublisher "mitmagic"
 #define MyAppURL "http://www.mitmagic.com/"
 #define MyAppExeName MyAppBaseName+".exe"

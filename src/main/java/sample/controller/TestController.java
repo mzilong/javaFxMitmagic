@@ -71,10 +71,10 @@ public class TestController extends BaseController {
         String color = PreferencesTools.getFxBasePref();
         new DialogBuilder(getIntent().getPrimaryStage()).setTitle(ControlResources.getString("Dialog.Tips"))
                 .setMessage(ControlResources.getString("Dialog.Message"))
-                .setPositiveBtn(ControlResources.getString("Dialog.Yes"), () -> {
+                .setPositiveBtn(ControlResources.getString("Dialog.yes.button"), () -> {
                     JFXUtils.runUiThread(() -> getIntent().closePrimaryStage());
                     Platform.exit();
-                }, "").setNegativeBtn(ControlResources.getString("Dialog.Cancel"), "").addListener(pane -> {
+                }, "").setNegativeBtn(ControlResources.getString("Dialog.cancel.button"), "").addListener(pane -> {
                     FxStyleUtils.setBase(pane,JFXUtils.colorToWebColor(Color.valueOf(color).brighter()));
                 }).create();
     }

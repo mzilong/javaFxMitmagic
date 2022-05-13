@@ -89,6 +89,9 @@ public class FxmlUtils {
         return loadFxmlFromResource(JFXResources.getResource(resourcePath),resourceBundle,controller);
     }
 
+    public static FXMLLoader loadFxmlFromResource(URL resourceURL) {
+        return loadFxmlFromResource(resourceURL,null);
+    }
     public static FXMLLoader loadFxmlFromResource(URL resourceURL, ResourceBundle resourceBundle) {
         return loadFxmlFromResource(resourceURL,resourceBundle,null);
     }
@@ -98,6 +101,9 @@ public class FxmlUtils {
             FXMLLoader fxmlLoader = new FXMLLoader();
             fxmlLoader.setBuilderFactory(new JavaFXBuilderFactory());
             fxmlLoader.setLocation(resourceURL);
+            if(resourceBundle==null){
+                resourceBundle = ResourceBundle.getBundle("com/sun/javafx/scene/control/skin/resources/controls");
+            }
             fxmlLoader.setResources(resourceBundle);
             fxmlLoader.setController(controller);
             fxmlLoader.load();

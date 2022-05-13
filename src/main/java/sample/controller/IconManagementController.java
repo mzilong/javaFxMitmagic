@@ -102,7 +102,7 @@ public class IconManagementController extends BaseController {
     private List<String> getCssClassTagNames(String cssPath){
         List<String> list = new ArrayList<>();
         try {
-            String string = FileUtils.readFileToString(new File(JFXResources.getResource("css/icon.css").toURI()),"UTF-8");
+            String string = FileUtils.fileRead(new File(JFXResources.getResource("css/icon.css").toURI()).toString());
             string = string.replace(" {","").replace("}","");
             String[] strArr= string.split("\r\n\r\n\r\n");
             for (int i = 1; i < strArr.length; i++) {

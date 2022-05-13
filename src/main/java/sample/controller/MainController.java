@@ -10,7 +10,6 @@ import javafx.collections.ObservableMap;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.geometry.Insets;
-import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTreeCell;
 import javafx.scene.input.KeyCode;
@@ -26,7 +25,6 @@ import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
 import javafx.util.StringConverter;
 import javafx.util.converter.FloatStringConverter;
-import javafx.util.converter.IntegerStringConverter;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.controlsfx.control.BreadCrumbBar;
@@ -38,12 +36,15 @@ import sample.event.BaseEvent;
 import sample.locale.ControlResources;
 import sample.model.BaseItem;
 import sample.model.FontItem;
+import sample.tools.BaseGlobal;
 import sample.tools.CRC16M;
 import sample.tools.PreferencesTools;
 import sample.tools.dialog.DialogBuilder;
 import sample.tools.dialog.Message;
-import sample.utils.*;
-import sample.utils.javafx.Borders;
+import sample.utils.DataUtils;
+import sample.utils.SerialPortParameter;
+import sample.utils.SerialPortTool;
+import sample.utils.ThreadPoolUtils;
 import sample.utils.javafx.FxIntent;
 import sample.utils.javafx.FxStyleUtils;
 import sample.utils.javafx.JFXUtils;
@@ -77,7 +78,7 @@ public class MainController extends BaseController {
     public ComboBox<Integer> cbBaudRate;
     public ComboBox<Integer> cbDataBits;
     public ComboBox<Float> cbStopBits;
-    public ComboBox<Integer> cbParity;
+    public ComboBox<String> cbParity;
     public ComboBox<String> cbFlowcontrol;
     public ComboBox<Integer> cbRequestTime;
 
@@ -105,6 +106,7 @@ public class MainController extends BaseController {
     public TextField tfStartNum,tfPageNum;
     public GridPane gpChildNode;
     public VBox vboxMain;
+    public Button btnOpenAscii;
 
 
     private SerialPortParameter serialPortParameter;
@@ -122,7 +124,7 @@ public class MainController extends BaseController {
 
     @Override
     public String initTitle() {
-        return ControlResources.getString("Title");
+        return ControlResources.getString("Title") + BaseGlobal.versions;
     }
 
     @Override
@@ -135,10 +137,10 @@ public class MainController extends BaseController {
         String color = PreferencesTools.getFxBasePref();
         new DialogBuilder(getIntent().getPrimaryStage()).setTitle(ControlResources.getString("Dialog.Tips"))
                 .setMessage(ControlResources.getString("Dialog.Message"))
-                .setPositiveBtn(ControlResources.getString("Dialog.Yes"), () -> {
+                .setPositiveBtn(ControlResources.getString("Dialog.yes.button"), () -> {
                     JFXUtils.runUiThread(() -> getIntent().closePrimaryStage());
                     Platform.exit();
-                }, "").setNegativeBtn(ControlResources.getString("Dialog.Cancel"), "").addListener(pane ->
+                }, "").setNegativeBtn(ControlResources.getString("Dialog.cancel.button"), "").addListener(pane ->
             FxStyleUtils.setBase(pane, JFXUtils.colorToWebColor(Color.valueOf(color).brighter()))
         ).create();
     }
@@ -198,6 +200,7 @@ public class MainController extends BaseController {
                 new TreeItem<>(new BaseItem<>(12,ControlResources.getString("DeviceInformation"), (byte)0x0C)),
                 new TreeItem<>(new BaseItem<>(13,ControlResources.getString("ParentNode"), (byte)0x0D)),
                 new TreeItem<>(new BaseItem<>(14,ControlResources.getString("CableTemperature"), (byte)0x0E)),
+                new TreeItem<>(new BaseItem<>(18,ControlResources.getString("CurrentAndVoltageCalibration"), (byte)0x12)),
                 nodeTreeItem
 
         );
@@ -416,17 +419,6 @@ public class MainController extends BaseController {
         addTextLimiter(textField,0,12);
     }
 
-    private Node setNodeTitleBorder(Node node,String title){
-        return Borders.wrap(node)
-                .lineBorder()
-                .title(title)
-                .color(Color.valueOf(PreferencesTools.getFxBasePref()))
-                .thickness(1)
-                .radius(5)
-                .build()
-                .build();
-    }
-
     private void initPortName(boolean isSet){
         ArrayList<String> aspList = SerialPortTool.getAvailableSerialPorts();
         ObservableList<String> observableList = FXCollections.observableList(aspList);//转化为可观察的list，支持改变监听
@@ -460,14 +452,21 @@ public class MainController extends BaseController {
                 return stopBits;
             }
         });
-        cbParity.getItems().addAll(SerialPort.NO_PARITY,SerialPort.ODD_PARITY,SerialPort.EVEN_PARITY,SerialPort.MARK_PARITY,SerialPort.SPACE_PARITY);
-        cbParity.setConverter(new IntegerStringConverter() {
-            @Override
-            public String toString(Integer object) {
-                return serialPortParameter.getParityStr(object);
-            }
-        });
-        cbParity.setValue(serialPortParameter.getParity());
+        cbParity.getItems().addAll(SerialPortParameter.PARITY_NONE,SerialPortParameter.PARITY_ODD,SerialPortParameter.PARITY_EVEN,SerialPortParameter.PARITY_MARK,SerialPortParameter.PARITY_SPACE);
+//        cbParity.setCellFactory(new Callback<>() {
+//            @Override
+//            public ListCell<String> call(ListView<String> stringListView) {
+//                final ListCell<String> cell = new ListCell<>() {
+//                    @Override
+//                    public void updateItem(String item, boolean empty) {
+//                        super.updateItem(item, empty);
+//                        serialPortParameter.setParityStr(item);
+//                    }
+//                };
+//                return cell;
+//            }
+//        });
+        cbParity.setValue(serialPortParameter.getParityStr());
         cbFlowcontrol.getItems().addAll(SerialPortParameter.FLOW_CONTROL_DISABLED,SerialPortParameter.FLOW_CONTROL_DSR_ENABLED
                 ,SerialPortParameter.FLOW_CONTROL_CTS_ENABLED,SerialPortParameter.FLOW_CONTROL_DTR_ENABLED,SerialPortParameter.FLOW_CONTROL_RTS_ENABLED
                 ,SerialPortParameter.FLOW_CONTROL_XONXOFF_IN_ENABLED,SerialPortParameter.FLOW_CONTROL_XONXOFF_OUT_ENABLED);
@@ -494,6 +493,11 @@ public class MainController extends BaseController {
 
     public void openIconManagement() {
         FxIntent intent = new FxIntent(IconManagementController.class, StageStyle.UTILITY);
+        intent.addData("data", "我是传过来的数据");
+        intent.start();
+    }
+    public void openAsciiManagement() {
+        FxIntent intent = new FxIntent(AsciiCodeManagementController.class, StageStyle.UTILITY);
         intent.addData("data", "我是传过来的数据");
         intent.start();
     }
@@ -536,7 +540,7 @@ public class MainController extends BaseController {
             }
             serialPortParameter.setStopBits((int) stopBits);
         }else  if(actionEvent.getTarget().equals(cbParity)){
-            serialPortParameter.setParity(cbParity.getSelectionModel().getSelectedItem());
+            serialPortParameter.setParityStr(cbParity.getSelectionModel().getSelectedItem());
         }else  if(actionEvent.getTarget().equals(cbFlowcontrol)){
             serialPortParameter.setFlowcontrolStr(cbFlowcontrol.getSelectionModel().getSelectedItem());
         }else  if(actionEvent.getTarget().equals(cbRequestTime)){
@@ -574,6 +578,8 @@ public class MainController extends BaseController {
             openCalculator();
         }else if(actionEvent.getTarget().equals(btnOpenIcon)){
             openIconManagement();
+        }else if(actionEvent.getTarget().equals(btnOpenAscii)){
+            openAsciiManagement();
         }
     }
     private void closeSerialPort(){
@@ -761,7 +767,7 @@ public class MainController extends BaseController {
                                     num = Integer.parseInt(DataUtils.bytesToHexString(dataBytes[2]),radix);
                                     unit = "%";
                                     msg.append(ControlResources.getString("Humidity")).append("：").append((int) num).append(unit);
-                                }else if(fcode==(byte)0x00||fcode==(byte)0x06||fcode==(byte)0x0D||fcode==(byte)0x05){
+                                }else if(fcode==(byte)0x00||fcode==(byte)0x06||fcode==(byte)0x0D||fcode==(byte)0x05||fcode==(byte)0x12){
                                     msg = new StringBuilder(dataBytes[0] == (byte) 0x00 ? ControlResources.getString("Success") : ControlResources.getString("Fail"));
                                 }else if(fcode==(byte)0x0C){
                                     byte[] macAddrBytes = new byte[6];
@@ -774,7 +780,22 @@ public class MainController extends BaseController {
                                         msg.append(ControlResources.getString("DestinationAddress")).append("：").append(DataUtils.bytesToHexString(desAddrBytes)).append("\n");
                                         msg.append(ControlResources.getString("SourceAddress")).append("：").append(DataUtils.bytesToHexString(srcAddrBytes)).append("\n");
                                     }
-                                    msg.append(ControlResources.getString("EquipmentType")).append("：").append(dataBytes[0] == 0x01 ? ControlResources.getString("BranchBoxSensor") : ControlResources.getString("MeterBoxSensor")).append("\n");
+                                    msg.append(ControlResources.getString("EquipmentType")).append("：");
+                                    switch (dataBytes[0]){
+                                        case 0x01:
+                                            msg.append(ControlResources.getString("BranchBoxSensor"));
+                                            break;
+                                        case 0x02:
+                                            msg.append(ControlResources.getString("MeterBoxSensor"));
+                                            break;
+                                        case 0x03:
+                                            msg.append(ControlResources.getString("WithTransformerSensor"));
+                                            break;
+                                        case 0x04:
+                                            msg.append(ControlResources.getString("SingleTopologyTransmitSensor"));
+                                            break;
+                                    }
+                                    msg.append("\n");
                                     msg.append(ControlResources.getString("MacAddr")).append("：").append(DataUtils.bytesToHexString(macAddrBytes)).append("\n");
                                     msg.append(ControlResources.getString("ParentNode.Addr")).append("：").append(DataUtils.bytesToHexString(parentAddrBytes)).append("\n");
                                     msg.append(ControlResources.getString("SoftwareVersionNumber")).append("：").append(Integer.parseInt((DataUtils.bytesToHexString(dataBytes[macAddrBytes.length + parentAddrBytes.length + 1])), 16) / 10.0f);
@@ -811,6 +832,7 @@ public class MainController extends BaseController {
                                 }else if(fcode==(byte)0x07){
                                     byte[] addrBytes = new byte[6];
                                     byte phase = dataBytes[addrBytes.length];
+                                    byte signalStrength = dataBytes[addrBytes.length+1];
                                     System.arraycopy(dataBytes,0,addrBytes,0,addrBytes.length);
                                     ArrayUtils.reverse(addrBytes);
                                     if(comMode==(byte)0x01) {
@@ -826,6 +848,7 @@ public class MainController extends BaseController {
                                         default: msg.append(ControlResources.getString("UnknownPhase")); break;
                                     }
                                     msg.append("\n");
+                                    msg.append(ControlResources.getString("SignalStrength")).append("：").append(DataUtils.bytesToHexString(signalStrength)).append("dBm").append("\n");
                                 }else if(fcode==(byte)0x0F){
                                     byte[] addrBytes = new byte[6];
                                     int allNum = (dataBytes[1]<<8)|dataBytes[0];

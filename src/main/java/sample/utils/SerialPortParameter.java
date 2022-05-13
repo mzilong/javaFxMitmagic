@@ -135,7 +135,7 @@ public final class SerialPortParameter {
         this.baudRate = SerialPortParameter.BAUDRATE_9600;
         this.dataBits = SerialPortParameter.DATABITS_8;
         this.stopBits = SerialPort.ONE_STOP_BIT;
-        this.parity = SerialPort.EVEN_PARITY;
+        this.parity = SerialPort.NO_PARITY;
         this.flowcontrol = SerialPort.FLOW_CONTROL_DISABLED;
     }
 
@@ -144,7 +144,7 @@ public final class SerialPortParameter {
         this.baudRate = baudRate;
         this.dataBits = SerialPortParameter.DATABITS_8;
         this.stopBits = SerialPort.ONE_STOP_BIT;
-        this.parity = SerialPort.EVEN_PARITY;
+        this.parity = SerialPort.NO_PARITY;
         this.flowcontrol = SerialPort.FLOW_CONTROL_DISABLED;
     }
 

@@ -7,6 +7,7 @@ import javafx.scene.Parent;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
@@ -17,6 +18,7 @@ import sample.event.FxEventBus;
 import sample.tools.PreferencesTools;
 import sample.tools.dialog.Message;
 import sample.tools.dialog.Notification;
+import sample.utils.javafx.Borders;
 import sample.utils.javafx.FxIntent;
 import sample.utils.javafx.FxStyleUtils;
 import sample.utils.javafx.JFXUtils;
@@ -199,5 +201,16 @@ public abstract class BaseController implements Initializable, EventHandler<Base
             return;
         }
         Notification.showAutoClose((Pane) root, message, type, milliseconds);
+    }
+
+    protected Node setNodeTitleBorder(Node node,String title){
+        return Borders.wrap(node)
+                .lineBorder()
+                .title(title)
+                .color(Color.valueOf(PreferencesTools.getFxBasePref()))
+                .thickness(1)
+                .radius(5)
+                .build()
+                .build();
     }
 }

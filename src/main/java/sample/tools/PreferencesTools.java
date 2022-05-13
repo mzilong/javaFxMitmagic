@@ -19,7 +19,7 @@ public class PreferencesTools {
 
     public static List<BaseItem<Locale>> LANGUAGES = new ArrayList<>();
     static {
-        LANGUAGES.add(new BaseItem<>(0, "中文", Locale.CHINESE));
+        LANGUAGES.add(new BaseItem<>(0, "中文", Locale.CHINA));
         LANGUAGES.add(new BaseItem<>(1, "English", Locale.ENGLISH));
     }
 

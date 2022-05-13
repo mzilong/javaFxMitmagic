@@ -2,6 +2,8 @@
   <library name="libs">
     <CLASSES>
       <root url="file://$JAVAFX_PATH$" />
+      <root url="jar://$PROJECT_DIR$/libs/lombok.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/pinyin4j-2.5.1.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>

@@ -131,6 +131,11 @@
                                                     </Button>
                                                     <Button fx:id="btnOpenIcon" onAction="#onButtonClick" prefHeight="50.0" text="%Title.IconManagement">
                                                         <graphic>
+                                                            <Icon styleClass="el-icon-s-marketing" />
+                                                        </graphic>
+                                                    </Button>
+                                                    <Button fx:id="btnOpenAscii" onAction="#onButtonClick" prefHeight="50.0" text="%Title.AsciiCodeManagement">
+                                                        <graphic>
                                                             <Icon styleClass="el-icon-info" />
                                                         </graphic>
                                                     </Button>

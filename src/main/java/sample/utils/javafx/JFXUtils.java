@@ -365,13 +365,19 @@ public class JFXUtils {
      * @param filePath
      * @return
      */
-    public static File selectSystemPath(Window ownerWindow,String filePath) {
-        DirectoryChooser chooser = new DirectoryChooser();
+    public static File selectSystemPath(Window ownerWindow,String title,String filePath) {
         if(filePath==null){
             filePath = "";
         }
         File oldDir = new File(filePath);
-        if (oldDir.exists()) {
+        return selectSystemPath(ownerWindow,title,oldDir);
+    }
+    public static File selectSystemPath(Window ownerWindow,String title,File oldDir) {
+        DirectoryChooser chooser = new DirectoryChooser();
+        if(title!=null&&title.length()>0){
+            chooser.setTitle(title);
+        }
+        if (oldDir!=null&&oldDir.exists()) {
             chooser.setInitialDirectory(oldDir);
         }
         File dir = chooser.showDialog(ownerWindow);

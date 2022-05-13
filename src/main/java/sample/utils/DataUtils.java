@@ -1,5 +1,6 @@
 package sample.utils;
 
+import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 
 /**
@@ -218,7 +219,11 @@ public class DataUtils {
      * @return
      */
     public static String integerToBinary(int integer) {
-        return Integer.toBinaryString(integer);
+        String tempStr = Integer.toBinaryString(integer);
+        while (tempStr.length() < 8) {
+            tempStr = "0" + tempStr;
+        }
+        return tempStr;
     }
 
     /**
@@ -266,4 +271,68 @@ public class DataUtils {
         return result;
     }
 
+    /**
+     * int到byte[]
+     * @param i
+     * @return
+     */
+    public static byte[] intToByteArray(int i) {
+        byte[] result = new byte[4];
+        // 由高位到低位
+        result[0] = (byte) ((i >> 24) & 0xFF);
+        result[1] = (byte) ((i >> 16) & 0xFF);
+        result[2] = (byte) ((i >> 8) & 0xFF);
+        result[3] = (byte) (i & 0xFF);
+        return result;
+    }
+    public static String intToAscii(int i) {
+        return bytesToAscii(intToByteArray(i),0,4,null);
+    }
+    public static String intToAscii(int i,String charsetName) {
+        return bytesToAscii(intToByteArray(i),0,4,charsetName);
+    }
+    public static String bytesToAscii(byte[] bytes, int offset, int dateLen,String charsetName) {
+        if ((bytes == null) || (bytes.length == 0) || (offset < 0) || (dateLen <= 0)) {
+            return null;
+        }
+        if ((offset >= bytes.length) || (bytes.length - offset < dateLen)) {
+            return null;
+        }
+
+        byte[] data = new byte[dateLen];
+        System.arraycopy(bytes, offset, data, 0, dateLen);
+        String asciiStr = null;
+        try {
+            if(charsetName==null){
+                asciiStr = new String(data);
+            }else{
+                asciiStr = new String(data, charsetName);
+            }
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return asciiStr;
+    }
+
+    /**
+     * 指定长度在前面补0
+     * @param code
+     * @param length
+     * @return
+     */
+    public static String makeUpCode(String code, int length) {
+        String makeUpCode = code.replace(" ", "");
+        String result = null;
+        if (makeUpCode.length() <= length) {
+            String string = "";
+            for (int i = 0; i < length - makeUpCode.length(); i++) {
+                string = string + "0";
+            }
+            result = string + makeUpCode;
+        } else {
+            result = makeUpCode.substring(makeUpCode.length() - length);
+        }
+
+        return result;
+    }
 }
