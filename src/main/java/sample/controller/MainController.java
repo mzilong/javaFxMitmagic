@@ -208,7 +208,7 @@ public class MainController extends BaseController {
                 new TreeItem<>(new BaseItem<>(13,ControlResources.getString("ParentNode"), (byte)0x0D)),
                 new TreeItem<>(new BaseItem<>(14,ControlResources.getString("CableTemperature"), (byte)0x0E)),
                 new TreeItem<>(new BaseItem<>(18,ControlResources.getString("CurrentAndVoltageCalibration"), (byte)0x12)),
-                new TreeItem<>(new BaseItem<>(19,ControlResources.getString("Configure.Mac"), (byte)0x13)),
+//                new TreeItem<>(new BaseItem<>(19,ControlResources.getString("Configure.Mac"), (byte)0x13)),
                 nodeTreeItem
 
         );
@@ -872,7 +872,7 @@ public class MainController extends BaseController {
                                         }
                                         ArrayUtils.reverse(dataTemp);
                                         num = DataUtils.byteArrayToInt(dataTemp,dataTemp.length)/multiple;
-                                        if(DataUtils.integerToBinary(dataBytes[1]).length()>8){
+                                        if(DataUtils.integerToBinary(dataTemp[1]).length()>8){
                                             num -= Math.pow(2,dataTemp.length/2*8);
                                         }
                                         msg.append(strList.get(j)).append("：").append(num).append(unit);
