@@ -871,9 +871,11 @@ public class MainController extends BaseController {
                                             System.arraycopy(dataBytes, start * dataTemp.length, dataTemp, 0, dataTemp.length);
                                         }
                                         ArrayUtils.reverse(dataTemp);
-                                        num = DataUtils.byteArrayToInt(dataTemp,dataTemp.length)/multiple;
-                                        if(DataUtils.integerToBinary(dataTemp[1]).length()>8){
-                                            num -= Math.pow(2,dataTemp.length/2*8);
+                                        int numTemp = DataUtils.byteArrayToInt(dataTemp,dataTemp.length);
+                                        if(DataUtils.integerToBinary(numTemp).length()>=16){
+                                            num = -Integer.parseInt(Integer.toBinaryString(~(numTemp - 1)).substring(16), 2)/multiple;
+                                        }else{
+                                            num = numTemp/multiple;
                                         }
                                         msg.append(strList.get(j)).append("：").append(num).append(unit);
                                         if(j!=strList.size()-1){
@@ -900,7 +902,7 @@ public class MainController extends BaseController {
                                         default: msg.append(ControlResources.getString("UnknownPhase")); break;
                                     }
                                     msg.append("\n");
-                                    msg.append(ControlResources.getString("SignalStrength")).append("：").append(DataUtils.bytesToHexString(signalStrength)).append("dBm").append("\n");
+                                    msg.append(ControlResources.getString("SignalStrength")).append("：").append(DataUtils.bytesToHexString(signalStrength)).append("\n");
                                 }else if(fcode==(byte)0x0F){
                                     byte[] addrBytes = new byte[6];
                                     int allNum = (dataBytes[1]<<8)|dataBytes[0];
