@@ -91,7 +91,7 @@
                                                       <Separator orientation="VERTICAL" prefHeight="120.0" />
                                                       <AnchorPane>
                                                           <children>
-                                                              <HBox spacing="5.0">
+                                                              <VBox spacing="5.0">
                                                                   <children>
                                                                       <HBox spacing="5.0">
                                                                           <children>
@@ -99,8 +99,14 @@
                                                                               <ComboBox fx:id="cbRequestTime" editable="true" onAction="#onChange" promptText="%RequestTime.Tip" />
                                                                           </children>
                                                                       </HBox>
+                                                                      <HBox spacing="5.0">
+                                                                          <children>
+                                                                              <Label maxHeight="1.7976931348623157E308" text="%RequestCount" />
+                                                                              <ComboBox fx:id="cbRequestCount" editable="true" onAction="#onChange" promptText="%RequestCount.Tip" />
+                                                                          </children>
+                                                                      </HBox>
                                                                   </children>
-                                                              </HBox>
+                                                              </VBox>
                                                               <Label alignment="CENTER" text="%Other" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
                                                           </children>
                                                       </AnchorPane>

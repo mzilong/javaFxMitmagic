@@ -82,8 +82,9 @@ public class MainController extends BaseController {
     public ComboBox<String> cbParity;
     public ComboBox<String> cbFlowcontrol;
     public ComboBox<Integer> cbRequestTime;
+    public ComboBox<Integer> cbRequestCount;
 
-    public TextArea textArea,textAreaShow;
+    public TextArea textArea,textAreaShow,textAreaRS;
     public Button btnSend;
     public Button btnClear;
     public Button btnCopy;
@@ -387,6 +388,7 @@ public class MainController extends BaseController {
         btnSend.setOnAction(this::onButtonClick);
         textArea = findView(parentContainer,"#textArea");
         textAreaShow = findView(parentContainer,"#textAreaShow");
+        textAreaRS = findView(parentContainer,"#textAreaRS");
         labResult = findView(parentResult,"#labResult");
         ((VBox) findView(parentResult,"#vboxResult")).getChildren().addAll(
                 setNodeTitleBorder(findView(parentResult,"#apResult"),ControlResources.getString("ReceiveData")));
@@ -523,6 +525,9 @@ public class MainController extends BaseController {
         cbRequestTime.getItems().addAll(1,2,3,6,10,15,20,60);
         cbRequestTime.setValue(3);
 
+        cbRequestCount.getItems().addAll(1,2,3,6,10,15,50,100);
+        cbRequestCount.setValue(1);
+
         cbPortName.setOnMouseClicked(mouseEvent -> initPortName(false));
     }
 
@@ -598,15 +603,42 @@ public class MainController extends BaseController {
             }else{
                 timeout = 3000;
             }
+        }else  if(actionEvent.getTarget().equals(cbRequestCount)){
+            initAllcount();
         }
     }
 
+    private final Runnable taskCount = () -> JFXUtils.runUiThread(this::sendData);
+
+    int allcount= 1;
+    private ScheduledThreadPoolExecutor allcountThreadPool;
+    private void countingCycle(){
+        if(allcountThreadPool!=null){
+            allcountThreadPool.shutdownNow();
+            allcountThreadPool = null;
+        }
+        allcount--;
+        if(allcount>0){
+            allcountThreadPool = ThreadPoolUtils.runDelayTime(taskCount, 100);
+        }
+    }
+    private void initAllcount(){
+        String allcountStr = cbRequestCount.getSelectionModel().getSelectedItem()+"";
+        if(StringUtils.isNotBlank(allcountStr)&&Integer.parseInt(allcountStr)>0){
+            allcount = Integer.parseInt(allcountStr);
+        }else{
+            allcount = 1;
+            cbRequestCount.setValue(allcount);
+        }
+    }
     public void onButtonClick(ActionEvent actionEvent) {
         if(actionEvent.getTarget().equals(btnClearAll)){
             textAreaShow.clear();
+            textAreaRS.clear();
             textArea.clear();
         }else if(actionEvent.getTarget().equals(btnClear)){
             textAreaShow.clear();
+            textAreaRS.clear();
         }else if(actionEvent.getTarget().equals(btnCopy)){
             textAreaShow.copy();
         }else if(actionEvent.getTarget().equals(btnPaste)){
@@ -616,8 +648,11 @@ public class MainController extends BaseController {
         }else if(actionEvent.getTarget().equals(btnConfigurePort)){
             configurePort();
         }else if(actionEvent.getTarget().equals(btnStart)||actionEvent.getTarget().equals(btnSend)){
+            initAllcount();
+
             sendData();
         }else if(actionEvent.getTarget().equals(btnStop)){
+            allcount = 0;
             stopData();
         }else if(actionEvent.getTarget().equals(btnOpenSerialPort)){
             closeSerialPort();
@@ -691,6 +726,9 @@ public class MainController extends BaseController {
                                 }
                                 setScrollToBottom(textAreaShow.getText() +ControlResources.getString("Receive")+ "：" +
                                         DataUtils.separatedByChr(Objects.requireNonNull(SerialPortTool.bytesToHexString(finalRecvBytes)).toUpperCase(), 2, " ") + "\n");
+                                textAreaRS.appendText("\n=============="+curBaseItem.name+"结果==============\n");
+                                textAreaRS.appendText(recMsg);
+                                countingCycle();
                             });
                         }
                     }
@@ -811,7 +849,7 @@ public class MainController extends BaseController {
                                     ArrayUtils.reverse(dataTemp);
                                     int numTemp = DataUtils.byteArrayToInt(dataTemp,dataTemp.length);
                                     if(DataUtils.integerToBinary(numTemp).length()>=16){
-                                        num = -Integer.parseInt(Integer.toBinaryString(~(numTemp - 1)).substring(16), 2)/multiple;
+                                        num = -Integer.parseInt(Integer.toBinaryString(-numTemp).substring(16), 2)/multiple;
                                     }else{
                                         num = numTemp/multiple;
                                     }
@@ -872,8 +910,15 @@ public class MainController extends BaseController {
                                         }
                                         ArrayUtils.reverse(dataTemp);
                                         int numTemp = DataUtils.byteArrayToInt(dataTemp,dataTemp.length);
+                                        //正确解析
                                         if(DataUtils.integerToBinary(numTemp).length()>=16){
-                                            num = -Integer.parseInt(Integer.toBinaryString(~(numTemp - 1)).substring(16), 2)/multiple;
+                                            num = -Integer.parseInt(Integer.toBinaryString(-numTemp).substring(16), 2)/multiple;
+                                        }else{
+                                            num = numTemp/multiple;
+                                        }
+                                        //将错就错，对应泰森温度正数部分用16位无符号存储导致多出来的FF*10
+                                        if(numTemp>0x80*10){
+                                            num = (0x100*10-numTemp)/-10f;
                                         }else{
                                             num = numTemp/multiple;
                                         }
@@ -994,9 +1039,10 @@ public class MainController extends BaseController {
                 AnimationUtils.createTransition(labResult, AnimationType.SHAKE).play();
             }
             setScrollToBottom(textAreaShow.getText() +ControlResources.getString("Receive")+"：" + ControlResources.getString("CommunicationTimeout") +"\n");
+            countingCycle();
         });
     };
-    ScheduledThreadPoolExecutor stpExecutor;
+    private ScheduledThreadPoolExecutor stpExecutor;
     private boolean isReceive;
     private void sendData() {
         if(serialPort==null){
@@ -1155,7 +1201,9 @@ public class MainController extends BaseController {
                 tfMac.setText(macAddrStr);
                 labMacResult.setText("");
             }else{
-                labResult.setText("");
+                if(allcount==1) {
+                    labResult.setText("");
+                }
             }
 
             //组报文发送帧
@@ -1260,6 +1308,7 @@ public class MainController extends BaseController {
         isReceive = false;
         if(stpExecutor!=null){
             stpExecutor.shutdownNow();
+            stpExecutor = null;
         }
     }
 

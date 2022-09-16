@@ -6,7 +6,7 @@ import sample.locale.ControlResources;
 /**
  * @name SerialPortParameter
  * @author mzl.
- * @date 2019/6/26.
+ * @date 2021/6/26.
  * @version 1.0
  * @Description 串口参数
  */

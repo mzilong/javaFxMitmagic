@@ -49,6 +49,7 @@
                 </children>
             </AnchorPane>
             <TextArea fx:id="textAreaShow" editable="false" prefHeight="200.0" VBox.vgrow="ALWAYS" />
+            <TextArea fx:id="textAreaRS" editable="false" prefHeight="200.0" VBox.vgrow="ALWAYS" />
         </VBox>
     </children>
 </AnchorPane>
