@@ -1,4 +1,4 @@
 Application name£º"Material topology technology and Application"
-Application version£º"1.4.6"
+Application version£º"1.4.8"
 Application publisher£º"mitmagic"
 Application web site£º"http://www.mitmagic.com/"

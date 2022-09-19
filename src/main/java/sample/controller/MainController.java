@@ -52,6 +52,7 @@ import sample.view.Icon;
 
 import java.io.IOException;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.regex.Pattern;
@@ -83,6 +84,7 @@ public class MainController extends BaseController {
     public ComboBox<String> cbFlowcontrol;
     public ComboBox<Integer> cbRequestTime;
     public ComboBox<Integer> cbRequestCount;
+    public ComboBox<Integer> cbRequestInterval;
 
     public TextArea textArea,textAreaShow,textAreaRS;
     public Button btnSend;
@@ -528,6 +530,9 @@ public class MainController extends BaseController {
         cbRequestCount.getItems().addAll(1,2,3,6,10,15,50,100);
         cbRequestCount.setValue(1);
 
+        cbRequestInterval.getItems().addAll(100,500,1000,60000,900000,3600000,7200000);
+        cbRequestInterval.setValue(100);
+
         cbPortName.setOnMouseClicked(mouseEvent -> initPortName(false));
     }
 
@@ -605,12 +610,22 @@ public class MainController extends BaseController {
             }
         }else  if(actionEvent.getTarget().equals(cbRequestCount)){
             initAllcount();
+        }else  if(actionEvent.getTarget().equals(cbRequestInterval)){
+            String allIntervalStr = cbRequestInterval.getSelectionModel().getSelectedItem()+"";
+            if(StringUtils.isNotBlank(allIntervalStr)&&Integer.parseInt(allIntervalStr)>0){
+                allInterval = Integer.parseInt(allIntervalStr);
+            }else{
+                allInterval = 100;
+                cbRequestInterval.setValue(allInterval);
+            }
         }
     }
 
+    private int allInterval= 100;
+
     private final Runnable taskCount = () -> JFXUtils.runUiThread(this::sendData);
 
-    int allcount= 1;
+    private int allcount= 1;
     private ScheduledThreadPoolExecutor allcountThreadPool;
     private void countingCycle(){
         if(allcountThreadPool!=null){
@@ -619,7 +634,7 @@ public class MainController extends BaseController {
         }
         allcount--;
         if(allcount>0){
-            allcountThreadPool = ThreadPoolUtils.runDelayTime(taskCount, 100);
+            allcountThreadPool = ThreadPoolUtils.runDelayTime(taskCount, allInterval);
         }
     }
     private void initAllcount(){
@@ -726,7 +741,7 @@ public class MainController extends BaseController {
                                 }
                                 setScrollToBottom(textAreaShow.getText() +ControlResources.getString("Receive")+ "：" +
                                         DataUtils.separatedByChr(Objects.requireNonNull(SerialPortTool.bytesToHexString(finalRecvBytes)).toUpperCase(), 2, " ") + "\n");
-                                textAreaRS.appendText("\n=============="+curBaseItem.name+"结果==============\n");
+                                textAreaRS.appendText("\n=============="+curBaseItem.name+"结果["+new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date())+"]==============\n");
                                 textAreaRS.appendText(recMsg);
                                 countingCycle();
                             });
@@ -917,11 +932,11 @@ public class MainController extends BaseController {
                                             num = numTemp/multiple;
                                         }
                                         //将错就错，对应泰森温度正数部分用16位无符号存储导致多出来的FF*10
-                                        if(numTemp>0x80*10){
-                                            num = (0x100*10-numTemp)/-10f;
-                                        }else{
-                                            num = numTemp/multiple;
-                                        }
+//                                        if(numTemp>0x80*10){
+//                                            num = (0x100*10-numTemp)/-10f;
+//                                        }else{
+//                                            num = numTemp/multiple;
+//                                        }
                                         msg.append(strList.get(j)).append("：").append(num).append(unit);
                                         if(j!=strList.size()-1){
                                             msg.append("\n");

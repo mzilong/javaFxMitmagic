@@ -97,12 +97,20 @@
                                                                           <children>
                                                                               <Label maxHeight="1.7976931348623157E308" text="%RequestTime" />
                                                                               <ComboBox fx:id="cbRequestTime" editable="true" onAction="#onChange" promptText="%RequestTime.Tip" />
+                                                                              <Label maxHeight="1.7976931348623157E308" text="%RequestTime.Unit" />
                                                                           </children>
                                                                       </HBox>
                                                                       <HBox spacing="5.0">
                                                                           <children>
                                                                               <Label maxHeight="1.7976931348623157E308" text="%RequestCount" />
                                                                               <ComboBox fx:id="cbRequestCount" editable="true" onAction="#onChange" promptText="%RequestCount.Tip" />
+                                                                          </children>
+                                                                      </HBox>
+                                                                      <HBox spacing="5.0">
+                                                                          <children>
+                                                                              <Label maxHeight="1.7976931348623157E308" text="%RequestInterval" />
+                                                                              <ComboBox fx:id="cbRequestInterval" editable="true" onAction="#onChange" promptText="%RequestInterval.Tip" />
+                                                                              <Label maxHeight="1.7976931348623157E308" text="%RequestInterval.Unit" />
                                                                           </children>
                                                                       </HBox>
                                                                   </children>
