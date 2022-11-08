@@ -663,8 +663,10 @@ public class MainController extends BaseController {
         }else if(actionEvent.getTarget().equals(btnConfigurePort)){
             configurePort();
         }else if(actionEvent.getTarget().equals(btnStart)||actionEvent.getTarget().equals(btnSend)){
+            if(isReceive){
+                return;
+            }
             initAllcount();
-
             sendData();
         }else if(actionEvent.getTarget().equals(btnStop)){
             allcount = 0;
@@ -1068,10 +1070,6 @@ public class MainController extends BaseController {
             return;
         }
 
-        if(isReceive){
-            return;
-        }
-
         if(curBaseItem!=null&&curBaseItem.id!=0){
             srcAddrStr = tfSourceAddress.getText().replace(" ", "").toUpperCase();
             desAddrStr = tfDestinationAddress.getText().replace(" ", "").toUpperCase();
@@ -1320,7 +1318,9 @@ public class MainController extends BaseController {
     }
 
     private void stopData() {
-        isReceive = false;
+        if(allcount<=1) {
+            isReceive = false;
+        }
         if(stpExecutor!=null){
             stpExecutor.shutdownNow();
             stpExecutor = null;
