@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.lang.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 <?import sample.view.*?>
 
-<AnchorPane style="-fx-background-color: -fx-background" xmlns="http://javafx.com/javafx/11.0.14-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.controller.MainController">
+<AnchorPane style="-fx-background-color: -fx-background" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.controller.MainController">
     <children>
         <VBox fx:id="vboxCalibration" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <children>
@@ -19,37 +20,79 @@
                         <ColumnConstraints />
                         <ColumnConstraints />
                         <ColumnConstraints />
+                        <ColumnConstraints />
                             </columnConstraints>
                             <rowConstraints>
                                 <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
                                 <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
                         <RowConstraints />
                         <RowConstraints />
+                        <RowConstraints />
+                        <RowConstraints />
+                        <RowConstraints />
+                        <RowConstraints />
                             </rowConstraints>
                             <children>
-                                <Label text="%password">
-                                    <graphic>
-                                        <Icon styleClass="el-icon-key" />
-                                    </graphic>
-                                </Label>
-                                <TextField fx:id="tfPassword" maxWidth="100.0" text="000" GridPane.columnIndex="1" />
-                                <Label text="%CurrentProportionalCoefficientCompensation" GridPane.rowIndex="1">
+                                <HBox spacing="5.0" GridPane.columnIndex="0" GridPane.columnSpan="5">
+                                    <children>
+                                        <Label maxHeight="1.7976931348623157E308" text="%SensorType" />
+                                        <ComboBox fx:id="cbSensorType" onAction="#onChange" promptText="%SensorType.Tip" />
+                                    </children>
+                                </HBox>
+                                  <Label fx:id="lbSensorTypeTip" maxHeight="1.7976931348623157E308" style="-fx-text-fill: red" text="%SensorType.MeterBox.Tip" GridPane.columnIndex="1" GridPane.columnSpan="5" />
+                                <Label text="%LastCurrent" GridPane.columnIndex="0" GridPane.rowIndex="1">
                                     <graphic>
                                         <Icon styleClass="el-icon-minus" />
                                     </graphic>
                                 </Label>
-                                <TextField fx:id="tfACurrentNum" maxWidth="100.0" promptText="A" text="0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                                <TextField fx:id="tfBCurrentNum" maxWidth="100.0" promptText="B" text="0" GridPane.columnIndex="2" GridPane.rowIndex="1" />
-                                <TextField fx:id="tfCCurrentNum" maxWidth="100.0" promptText="C" text="0" GridPane.columnIndex="3" GridPane.rowIndex="1" />
-                                <TextField fx:id="tfNCurrentNum" maxWidth="100.0" promptText="N" text="0" GridPane.columnIndex="4" GridPane.rowIndex="1" />
-                                <Label text="%VoltageScalingFactorCompensation" GridPane.columnIndex="0" GridPane.halignment="LEFT" GridPane.rowIndex="2">
+                                <TextField fx:id="tfACurrentLsat" maxWidth="100.0" promptText="A" text="0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                <TextField fx:id="tfBCurrentLsat" maxWidth="100.0" promptText="B" text="0" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                                <TextField fx:id="tfCCurrentLsat" maxWidth="100.0" promptText="C" text="0" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                                <TextField fx:id="tfNCurrentLsat" maxWidth="100.0" promptText="N" text="0" GridPane.columnIndex="4" GridPane.rowIndex="1" />
+
+                                <Label text="%LastVoltage" GridPane.columnIndex="0" GridPane.halignment="LEFT" GridPane.rowIndex="2">
                                     <graphic>
                                         <Icon styleClass="el-icon-attract" />
                                     </graphic>
                                 </Label>
-                                <TextField fx:id="tfAVoltageNum" maxWidth="100.0" promptText="A" text="0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                                <TextField fx:id="tfBVoltageNum" maxWidth="100.0" promptText="B" text="0" GridPane.columnIndex="2" GridPane.rowIndex="2" />
-                                <TextField fx:id="tfCVoltageNum" maxWidth="100.0" promptText="C" text="0" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+                                <TextField fx:id="tfAVoltageLsat" maxWidth="100.0" promptText="A" text="0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                <TextField fx:id="tfBVoltageLsat" maxWidth="100.0" promptText="B" text="0" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                                <TextField fx:id="tfCVoltageLsat" maxWidth="100.0" promptText="C" text="0" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+                                <Label text="%password" GridPane.columnIndex="0" GridPane.rowIndex="4">
+                                    <graphic>
+                                        <Icon styleClass="el-icon-key" />
+                                    </graphic>
+                                </Label>
+                                <TextField fx:id="tfPassword" maxWidth="100.0" text="000" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+
+                                <Label text="%CurrentProportionalCoefficientCompensation" GridPane.columnIndex="0" GridPane.rowIndex="5">
+                                    <graphic>
+                                        <Icon styleClass="el-icon-minus" />
+                                    </graphic>
+                                </Label>
+                                <TextField fx:id="tfACurrentNum" maxWidth="100.0" promptText="A" text="0" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                                <TextField fx:id="tfBCurrentNum" maxWidth="100.0" promptText="B" text="0" GridPane.columnIndex="2" GridPane.rowIndex="5" />
+                                <TextField fx:id="tfCCurrentNum" maxWidth="100.0" promptText="C" text="0" GridPane.columnIndex="3" GridPane.rowIndex="5" />
+                                <TextField fx:id="tfNCurrentNum" maxWidth="100.0" promptText="N" text="0" GridPane.columnIndex="4" GridPane.rowIndex="5" />
+                                <Button fx:id="btnCurrentCalculation" onAction="#onButtonClick" text="%Calculation" GridPane.columnIndex="5" GridPane.rowIndex="5">
+                                    <graphic>
+                                        <Icon styleClass="el-icon-s-platform" />
+                                    </graphic>
+                                </Button>
+
+                                <Label text="%VoltageScalingFactorCompensation" GridPane.columnIndex="0" GridPane.halignment="LEFT" GridPane.rowIndex="6">
+                                    <graphic>
+                                        <Icon styleClass="el-icon-attract" />
+                                    </graphic>
+                                </Label>
+                                <TextField fx:id="tfAVoltageNum" maxWidth="100.0" promptText="A" text="0" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                                <TextField fx:id="tfBVoltageNum" maxWidth="100.0" promptText="B" text="0" GridPane.columnIndex="2" GridPane.rowIndex="6" />
+                                <TextField fx:id="tfCVoltageNum" maxWidth="100.0" promptText="C" text="0" GridPane.columnIndex="3" GridPane.rowIndex="6" />
+                                <Button fx:id="btnVoltageCalculation" onAction="#onButtonClick" text="%Calculation" GridPane.columnIndex="5" GridPane.rowIndex="6">
+                                    <graphic>
+                                        <Icon styleClass="el-icon-s-platform" />
+                                    </graphic>
+                                </Button>
                             </children>
                         </GridPane>
                     </children>

@@ -117,6 +117,11 @@ public class MainController extends BaseController {
     public TextArea labCalibrationResult;
     public TextArea labMacResult;
     public TextField tfMacPassword,tfMac;
+    public TextField tfACurrentLsat,tfBCurrentLsat,tfCCurrentLsat,tfNCurrentLsat;
+    public TextField tfAVoltageLsat,tfBVoltageLsat,tfCVoltageLsat;
+    public Button btnCurrentCalculation,btnVoltageCalculation;
+    public ComboBox<BaseItem<String>> cbSensorType;
+    public Label lbSensorTypeTip;
 
 
     private SerialPortParameter serialPortParameter;
@@ -201,7 +206,6 @@ public class MainController extends BaseController {
                 new TreeItem<>(new BaseItem<>(3,ControlResources.getString("LeakageCurrent"), (byte)0x03)),
                 new TreeItem<>(new BaseItem<>(4,ControlResources.getString("WetTemperature"), (byte)0x04)),
                 new TreeItem<>(new BaseItem<>(5,ControlResources.getString("ReadTheStationTopology"), (byte)0x05)),
-                new TreeItem<>(new BaseItem<>(6,ControlResources.getString("ResetTheMeteringModule"), (byte)0x06)),
                 new TreeItem<>(new BaseItem<>(7,ControlResources.getString("SendingStationAreaTopology"), (byte)0x07)),
                 new TreeItem<>(new BaseItem<>(8,ControlResources.getString("ActivePower"), (byte)0x08)),
                 new TreeItem<>(new BaseItem<>(9,ControlResources.getString("ReactivePower"), (byte)0x09)),
@@ -211,6 +215,7 @@ public class MainController extends BaseController {
                 new TreeItem<>(new BaseItem<>(13,ControlResources.getString("ParentNode"), (byte)0x0D)),
                 new TreeItem<>(new BaseItem<>(14,ControlResources.getString("CableTemperature"), (byte)0x0E)),
                 new TreeItem<>(new BaseItem<>(18,ControlResources.getString("CurrentAndVoltageCalibration"), (byte)0x12)),
+                new TreeItem<>(new BaseItem<>(6,ControlResources.getString("ResetTheMeteringModule"), (byte)0x06)),
 //                new TreeItem<>(new BaseItem<>(19,ControlResources.getString("Configure.Mac"), (byte)0x13)),
                 nodeTreeItem
 
@@ -274,6 +279,49 @@ public class MainController extends BaseController {
             } else if (baseItem.id==18) {
                 parentCurrentAndVoltageCalibration.toFront();
                 labCalibrationResult.setText("");
+                if(isNewCurrent){
+                    if(currentList.size()==3){
+                        //三相
+                        tfACurrentLsat.setText(currentList.get(0).toString());
+                        tfBCurrentLsat.setText(currentList.get(1).toString());
+                        tfCCurrentLsat.setText(currentList.get(2).toString());
+                    }else{
+                        //单相
+                        tfACurrentLsat.setText("0");
+                        tfBCurrentLsat.setText("0");
+                        tfCCurrentLsat.setText(currentList.get(0).toString());
+                    }
+                    tfNCurrentLsat.setText("0");
+                }else{
+                    tfACurrentLsat.setText("");
+                    tfBCurrentLsat.setText("");
+                    tfCCurrentLsat.setText("");
+                    tfNCurrentLsat.setText("");
+                }
+                tfACurrentNum.setText("0");
+                tfBCurrentNum.setText("0");
+                tfCCurrentNum.setText("0");
+                tfNCurrentNum.setText("0");
+                if(isNewVoltage){
+                    if(currentList.size()==3){
+                        //三相
+                        tfAVoltageLsat.setText(voltageList.get(0).toString());
+                        tfBVoltageLsat.setText(voltageList.get(1).toString());
+                        tfCVoltageLsat.setText(voltageList.get(2).toString());
+                    }else{
+                        //单相
+                        tfAVoltageLsat.setText("0");
+                        tfBVoltageLsat.setText("0");
+                        tfCVoltageLsat.setText(voltageList.get(0).toString());
+                    }
+                }else{
+                    tfAVoltageLsat.setText("");
+                    tfBVoltageLsat.setText("");
+                    tfCVoltageLsat.setText("");
+                }
+                tfAVoltageNum.setText("0");
+                tfBVoltageNum.setText("0");
+                tfCVoltageNum.setText("0");
             }  else if (baseItem.id==19) {
                 parentMacConfig.toFront();
                 labMacResult.setText("");
@@ -344,6 +392,14 @@ public class MainController extends BaseController {
         addTextLimiter(tfAVoltageNum,3,4);
         addTextLimiter(tfBVoltageNum,3,4);
         addTextLimiter(tfCVoltageNum,3,4);
+
+        addTextLimiter(tfACurrentLsat,4,-1);
+        addTextLimiter(tfBCurrentLsat,4,-1);
+        addTextLimiter(tfCCurrentLsat,4,-1);
+        addTextLimiter(tfNCurrentLsat,4,-1);
+        addTextLimiter(tfAVoltageLsat,4,-1);
+        addTextLimiter(tfBVoltageLsat,4,-1);
+        addTextLimiter(tfCVoltageLsat,4,-1);
     }
 
     public void addTextLimiter(final TextField tf, int patternType, final int maxLength){
@@ -354,6 +410,8 @@ public class MainController extends BaseController {
             matches = "[A-Fa-f0-9]+";
         }else if(patternType == 3){
             matches = "(\\-)?(\\d)*";
+        }else if(patternType == 4){
+            matches = "^(([1-9]{1}\\d*)|([0]{1}))(\\.(\\d){0,4})?$";
         }
         String finalMatches = matches;
         tf.textProperty().addListener((ov, oldValue, newValue) -> {
@@ -425,6 +483,18 @@ public class MainController extends BaseController {
         tfAVoltageNum = findView(parentCurrentAndVoltageCalibration,"#tfAVoltageNum");
         tfBVoltageNum = findView(parentCurrentAndVoltageCalibration,"#tfBVoltageNum");
         tfCVoltageNum = findView(parentCurrentAndVoltageCalibration,"#tfCVoltageNum");
+        tfACurrentLsat = findView(parentCurrentAndVoltageCalibration,"#tfACurrentLsat");
+        tfBCurrentLsat = findView(parentCurrentAndVoltageCalibration,"#tfBCurrentLsat");
+        tfCCurrentLsat = findView(parentCurrentAndVoltageCalibration,"#tfCCurrentLsat");
+        tfNCurrentLsat = findView(parentCurrentAndVoltageCalibration,"#tfNCurrentLsat");
+        tfAVoltageLsat = findView(parentCurrentAndVoltageCalibration,"#tfAVoltageLsat");
+        tfBVoltageLsat = findView(parentCurrentAndVoltageCalibration,"#tfBVoltageLsat");
+        tfCVoltageLsat = findView(parentCurrentAndVoltageCalibration,"#tfCVoltageLsat");
+        btnCurrentCalculation = findView(parentCurrentAndVoltageCalibration,"#btnCurrentCalculation");
+        btnVoltageCalculation = findView(parentCurrentAndVoltageCalibration,"#btnVoltageCalculation");
+        cbSensorType = findView(parentCurrentAndVoltageCalibration,"#cbSensorType");
+        lbSensorTypeTip = findView(parentCurrentAndVoltageCalibration,"#lbSensorTypeTip");
+        tfCVoltageLsat = findView(parentCurrentAndVoltageCalibration,"#tfCVoltageLsat");
         labCalibrationResult = findView(parentCurrentAndVoltageCalibration,"#labCalibrationResult");
         ((VBox) findView(parentCurrentAndVoltageCalibration,"#vboxCalibration")).getChildren().addAll(
                 setNodeTitleBorder(findView(parentCurrentAndVoltageCalibration,"#apCalibration"),ControlResources.getString("DataField")),
@@ -533,6 +603,30 @@ public class MainController extends BaseController {
         cbRequestInterval.getItems().addAll(100,500,1000,60000,900000,3600000,7200000);
         cbRequestInterval.setValue(100);
 
+        List<BaseItem<String>> sensorTypeList= new LinkedList<>();
+        sensorTypeList.add(new BaseItem<>(0, ControlResources.getString("SensorType.UniphaseMeterBox"), ControlResources.getString("SensorType.MeterBox.Tip")));
+        sensorTypeList.add(new BaseItem<>(1,ControlResources.getString("SensorType.TriphaseMeterBox"),ControlResources.getString("SensorType.MeterBox.Tip")));
+        sensorTypeList.add(new BaseItem<>(2,ControlResources.getString("SensorType.BranchBox"),ControlResources.getString("SensorType.BranchBox.Tip")));
+        sensorTypeList.add(new BaseItem<>(3,ControlResources.getString("SensorType.DistributionTransformerBox"),ControlResources.getString("SensorType.DistributionTransformerBox.Tip")));
+        cbSensorType.getItems().addAll(sensorTypeList);
+        cbSensorType.setValue(sensorTypeList.get(0));
+        cbSensorType.setConverter(new StringConverter<>() {
+
+            @Override
+            public String toString(BaseItem<String> stringBaseItem) {
+                return stringBaseItem.name;
+            }
+
+            @Override
+            public BaseItem<String> fromString(String s) {
+                for (BaseItem<String> stringBaseItem:sensorTypeList){
+                    if(s.contains(stringBaseItem.name)){
+                        return stringBaseItem;
+                    }
+                }
+                return null;
+            }
+        });
         cbPortName.setOnMouseClicked(mouseEvent -> initPortName(false));
     }
 
@@ -618,9 +712,13 @@ public class MainController extends BaseController {
                 allInterval = 100;
                 cbRequestInterval.setValue(allInterval);
             }
+        }else  if(actionEvent.getTarget().equals(cbSensorType)){
+            BaseItem<String> sensorTypeItem= cbSensorType.getSelectionModel().getSelectedItem();
+            sensorType = sensorTypeItem.id;
+            lbSensorTypeTip.setText(sensorTypeItem.value);
         }
     }
-
+    private int sensorType;
     private int allInterval= 100;
 
     private final Runnable taskCount = () -> JFXUtils.runUiThread(this::sendData);
@@ -680,6 +778,93 @@ public class MainController extends BaseController {
             openIconManagement();
         }else if(actionEvent.getTarget().equals(btnOpenAscii)){
             openAsciiManagement();
+        }else if(actionEvent.getTarget().equals(btnCurrentCalculation)){
+            currentAndVoltageCalibration(0);
+        }else if(actionEvent.getTarget().equals(btnVoltageCalculation)){
+            currentAndVoltageCalibration(1);
+        }
+    }
+    private void currentAndVoltageCalibration(int type){
+        if(type==0){
+            if(StringUtils.isEmpty(tfACurrentLsat.getText())){
+                AnimationUtils.createTransition(tfACurrentLsat, AnimationType.SHAKE).play();
+                tfACurrentLsat.requestFocus();
+                return;
+            }
+            if(StringUtils.isEmpty(tfBCurrentLsat.getText())){
+                AnimationUtils.createTransition(tfBCurrentLsat, AnimationType.SHAKE).play();
+                tfBCurrentLsat.requestFocus();
+                return;
+            }
+            if(StringUtils.isEmpty(tfCCurrentLsat.getText())){
+                AnimationUtils.createTransition(tfCCurrentLsat, AnimationType.SHAKE).play();
+                tfCCurrentLsat.requestFocus();
+                return;
+            }
+            if(StringUtils.isEmpty(tfNCurrentLsat.getText())){
+                AnimationUtils.createTransition(tfNCurrentLsat, AnimationType.SHAKE).play();
+                tfNCurrentLsat.requestFocus();
+                return;
+            }
+            float aCurrentLast = Float.parseFloat(tfACurrentLsat.getText());
+            float bCurrentLast = Float.parseFloat(tfBCurrentLsat.getText());
+            float cCurrentLast = Float.parseFloat(tfCCurrentLsat.getText());
+            float nCurrentLast = Float.parseFloat(tfNCurrentLsat.getText());
+            long aCurrentNum = 0,bCurrentNum = 0,cCurrentNum = 0,nCurrentNum = 0;
+            if(sensorType==0){
+                cCurrentNum = Math.round((cCurrentLast - 50) * 1000 * 0.03298);
+                nCurrentNum = 0;
+            }else if(sensorType==1){
+                aCurrentNum = Math.round((aCurrentLast - 50) * 1000 * 0.034);
+                bCurrentNum = Math.round((bCurrentLast - 50) * 1000 * 0.034);
+                cCurrentNum = Math.round((cCurrentLast - 50) * 1000 * 0.034);
+                nCurrentNum = 0;
+            }else if(sensorType==2){
+                aCurrentNum = Math.round((aCurrentLast - 400) * 1000 * 0.00425);
+                bCurrentNum = Math.round((bCurrentLast - 400) * 1000 * 0.00425);
+                cCurrentNum = Math.round((cCurrentLast - 400) * 1000 * 0.00425);
+                nCurrentNum = 0;
+            }else if(sensorType==3){
+                aCurrentNum = Math.round((aCurrentLast - 800) * 1000 * 0.001875);
+                bCurrentNum = Math.round((bCurrentLast - 800) * 1000 * 0.001875);
+                cCurrentNum = Math.round((cCurrentLast - 800) * 1000 * 0.001875);
+                nCurrentNum = 0;
+            }
+            tfACurrentNum.setText(String.valueOf(aCurrentNum));
+            tfBCurrentNum.setText(String.valueOf(bCurrentNum));
+            tfCCurrentNum.setText(String.valueOf(cCurrentNum));
+            tfNCurrentNum.setText(String.valueOf(nCurrentNum));
+        }else if(type==1){
+            if(StringUtils.isEmpty(tfAVoltageLsat.getText())){
+                AnimationUtils.createTransition(tfAVoltageLsat, AnimationType.SHAKE).play();
+                tfAVoltageLsat.requestFocus();
+                return;
+            }
+            if(StringUtils.isEmpty(tfBVoltageLsat.getText())){
+                AnimationUtils.createTransition(tfBVoltageLsat, AnimationType.SHAKE).play();
+                tfBVoltageLsat.requestFocus();
+                return;
+            }
+            if(StringUtils.isEmpty(tfCVoltageLsat.getText())){
+                AnimationUtils.createTransition(tfCVoltageLsat, AnimationType.SHAKE).play();
+                tfCVoltageLsat.requestFocus();
+                return;
+            }
+            float aVoltageLast = Float.parseFloat(tfAVoltageLsat.getText());
+            float bVoltageLast = Float.parseFloat(tfBVoltageLsat.getText());
+            float cVoltageLast = Float.parseFloat(tfCVoltageLsat.getText());
+            long aVoltageNum = 0,bVoltageNum = 0,cVoltageNum = 0;
+            if(sensorType==0){
+                cVoltageNum = Math.round((cVoltageLast - 220) * 10 * 0.3591);
+            }else if(sensorType==1||sensorType==2||sensorType==3){
+                aVoltageNum = Math.round((aVoltageLast - 220) * 10 * 0.6895);
+                bVoltageNum = Math.round((bVoltageLast - 220) * 10 * 0.6895);
+                cVoltageNum = Math.round((cVoltageLast - 220) * 10 * 0.6895);
+            }
+            tfAVoltageNum.setText(String.valueOf(aVoltageNum));
+            tfBVoltageNum.setText(String.valueOf(bVoltageNum));
+            tfCVoltageNum.setText(String.valueOf(cVoltageNum));
+
         }
     }
     private void closeSerialPort(){
@@ -736,6 +921,7 @@ public class MainController extends BaseController {
                                     labChlidNodeResult.setText(recMsg);
                                 }else if(curBaseItem.id==18){
                                     labCalibrationResult.setText(recMsg);
+
                                 }else if(curBaseItem.id==19){
                                     labMacResult.setText(recMsg);
                                 }else{
@@ -856,7 +1042,7 @@ public class MainController extends BaseController {
                                         strList.add(ControlResources.getString("Cphase"));
                                     }
 
-                                    msg = new StringBuilder(formatMsg(dataBytes, strList, unit, radix, multiple, interval));
+                                    msg = new StringBuilder(formatMsg(dataBytes, strList, unit, radix, multiple, interval,fcode));
                                 }else if(fcode==(byte)0x04){
                                     multiple= 10.0f;
                                     unit = "℃";
@@ -876,6 +1062,10 @@ public class MainController extends BaseController {
                                     msg.append(ControlResources.getString("Humidity")).append("：").append((int) num).append(unit);
                                 }else if(fcode==(byte)0x00||fcode==(byte)0x06||fcode==(byte)0x0D||fcode==(byte)0x05||fcode==(byte)0x12){
                                     msg = new StringBuilder(dataBytes[0] == (byte) 0x00 ? ControlResources.getString("Success") : ControlResources.getString("Fail"));
+                                    if(curBaseItem.id==18&&dataBytes[0] == (byte) 0x00){
+                                        isNewCurrent = false;
+                                        isNewVoltage = false;
+                                    }
                                 }else if(fcode==(byte)0x0C){
                                     byte[] macAddrBytes = new byte[6];
                                     System.arraycopy(dataBytes,1,macAddrBytes,0,macAddrBytes.length);
@@ -944,7 +1134,6 @@ public class MainController extends BaseController {
                                             msg.append("\n");
                                         }
                                     }
-//                                    msg = new StringBuilder(formatMsg(dataBytes, strList, unit, radix, multiple, interval));
                                 }else if(fcode==(byte)0x07){
                                     byte[] addrBytes = new byte[6];
                                     byte phase = dataBytes[addrBytes.length];
@@ -1014,17 +1203,33 @@ public class MainController extends BaseController {
         return isPhase == len;
     }
 
-    private String formatMsg(byte[] dataBytes, List<String> strList, String unit, int radix, float multiple, int interval){
+    List<Float> voltageList =new LinkedList<>();
+    List<Float> currentList =new LinkedList<>();
+    private boolean isNewCurrent;
+    private boolean isNewVoltage;
+    private String formatMsg(byte[] dataBytes, List<String> strList, String unit, int radix, float multiple, int interval, byte fcode){
         StringBuilder msg = new StringBuilder();
         float num;
         byte[] dataTemp = new byte[interval];
         int start = dataBytes.length/dataTemp.length-strList.size();
+        if(fcode==0x01){
+            currentList.clear();
+            isNewCurrent = true;
+        } else if(fcode==0x02){
+            voltageList.clear();
+            isNewVoltage = true;
+        }
         for (int j =0;j<strList.size();j++,start++){
             if(dataBytes.length-start*dataTemp.length>=dataTemp.length) {
                 System.arraycopy(dataBytes, start * dataTemp.length, dataTemp, 0, dataTemp.length);
             }
             ArrayUtils.reverse(dataTemp);
             num = Integer.parseInt(DataUtils.bytesToHexString(dataTemp),radix)/multiple;
+            if(fcode==0x01){
+                currentList.add(num);
+            } else if(fcode==0x02){
+                voltageList.add(num);
+            }
             msg.append(strList.get(j)).append("：").append(num).append(unit);
             if(j!=strList.size()-1){
                 msg.append("\n");
@@ -1310,7 +1515,7 @@ public class MainController extends BaseController {
             }
         }
 
-            senBytes[0]= ADDR;//地址A
+        senBytes[0]= ADDR;//地址A
         senBytes[1]= (byte) (curBaseItem.value|com);//功能码FUN
         senBytes[2]= (byte) (count - 3);//数据域-数据长度L
         senBytes = CRC16M.updateCheckCode(senBytes,count);
@@ -1329,6 +1534,8 @@ public class MainController extends BaseController {
 
     private void setScrollToBottom(String txt){
         textAreaShow.setText(txt);
-        textAreaShow.setScrollTop(Double.MAX_VALUE);
+        if(allcount<=1) {
+            textAreaShow.setScrollTop(Double.MAX_VALUE);
+        }
     }
 }
