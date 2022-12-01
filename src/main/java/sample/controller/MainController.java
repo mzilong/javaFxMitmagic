@@ -825,9 +825,9 @@ public class MainController extends BaseController {
                 cCurrentNum = Math.round((cCurrentLast - 400) * 1000 * 0.00425);
                 nCurrentNum = 0;
             }else if(sensorType==3){
-                aCurrentNum = Math.round((aCurrentLast - 800) * 1000 * 0.001875);
-                bCurrentNum = Math.round((bCurrentLast - 800) * 1000 * 0.001875);
-                cCurrentNum = Math.round((cCurrentLast - 800) * 1000 * 0.001875);
+                aCurrentNum = Math.round((aCurrentLast - 800) * 1000 * 0.002125);
+                bCurrentNum = Math.round((bCurrentLast - 800) * 1000 * 0.002125);
+                cCurrentNum = Math.round((cCurrentLast - 800) * 1000 * 0.002125);
                 nCurrentNum = 0;
             }
             tfACurrentNum.setText(String.valueOf(aCurrentNum));
