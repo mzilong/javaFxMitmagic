@@ -30,3 +30,4 @@ idea运行流程说明：运行无法设置字体或者颜色的时候就打开r
 
 打包流程说明：本项目直接maven package运行打包,然后windows系统就双击项目下output/.iss配置文件打开inno setup生成安装包
 
+注意：本项目需要使用jdk11.0.8这个版本package打包
