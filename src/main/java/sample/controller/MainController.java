@@ -608,6 +608,8 @@ public class MainController extends BaseController {
         sensorTypeList.add(new BaseItem<>(1,ControlResources.getString("SensorType.TriphaseMeterBox"),ControlResources.getString("SensorType.MeterBox.Tip")));
         sensorTypeList.add(new BaseItem<>(2,ControlResources.getString("SensorType.BranchBox"),ControlResources.getString("SensorType.BranchBox.Tip")));
         sensorTypeList.add(new BaseItem<>(3,ControlResources.getString("SensorType.DistributionTransformerBox"),ControlResources.getString("SensorType.DistributionTransformerBox.Tip")));
+        sensorTypeList.add(new BaseItem<>(4,ControlResources.getString("SensorType.ThreePhaseSensor400A"),ControlResources.getString("SensorType.ThreePhaseSensor.Tip")));
+        sensorTypeList.add(new BaseItem<>(5,ControlResources.getString("SensorType.ThreePhaseSensor200A"),ControlResources.getString("SensorType.ThreePhaseSensor.Tip")));
         cbSensorType.getItems().addAll(sensorTypeList);
         cbSensorType.setValue(sensorTypeList.get(0));
         cbSensorType.setConverter(new StringConverter<>() {
@@ -829,6 +831,11 @@ public class MainController extends BaseController {
                 bCurrentNum = Math.round((bCurrentLast - 800) * 1000 * 0.002125);
                 cCurrentNum = Math.round((cCurrentLast - 800) * 1000 * 0.002125);
                 nCurrentNum = 0;
+            }else if(sensorType==4||sensorType==5){
+                aCurrentNum = Math.round((aCurrentLast - 200) * 1000 * 0.0085);
+                bCurrentNum = Math.round((bCurrentLast - 200) * 1000 * 0.0085);
+                cCurrentNum = Math.round((cCurrentLast - 200) * 1000 * 0.0085);
+                nCurrentNum = 0;
             }
             tfACurrentNum.setText(String.valueOf(aCurrentNum));
             tfBCurrentNum.setText(String.valueOf(bCurrentNum));
@@ -860,6 +867,10 @@ public class MainController extends BaseController {
                 aVoltageNum = Math.round((aVoltageLast - 220) * 10 * 0.6895);
                 bVoltageNum = Math.round((bVoltageLast - 220) * 10 * 0.6895);
                 cVoltageNum = Math.round((cVoltageLast - 220) * 10 * 0.6895);
+            }else if(sensorType==4||sensorType==5){
+                aVoltageNum = 0;
+                bVoltageNum = 0;
+                cVoltageNum = 0;
             }
             tfAVoltageNum.setText(String.valueOf(aVoltageNum));
             tfBVoltageNum.setText(String.valueOf(bVoltageNum));
@@ -1090,6 +1101,12 @@ public class MainController extends BaseController {
                                             break;
                                         case 0x04:
                                             msg.append(ControlResources.getString("SingleTopologyTransmitSensor"));
+                                            break;
+                                        case 0x05:
+                                            msg.append(ControlResources.getString("ThreePhaseSensor400A"));
+                                            break;
+                                        case 0x06:
+                                            msg.append(ControlResources.getString("ThreePhaseSensor200A"));
                                             break;
                                     }
                                     msg.append("\n");
